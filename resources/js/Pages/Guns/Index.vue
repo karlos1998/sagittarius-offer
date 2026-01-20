@@ -1,7 +1,7 @@
 <template>
     <div class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
         <GunsHeader/>
-        <GunsGrid :guns="guns"/>
+        <GunsGrid :guns="guns" :gun-types="gunTypes"/>
         <Footer/>
     </div>
 </template>
@@ -14,6 +14,10 @@ import GunsHeader from '../../Components/Guns/GunsHeader.vue';
 
 defineProps({
     guns: {
+        type: Array,
+        default: () => []
+    },
+    gunTypes: {
         type: Array,
         default: () => []
     }

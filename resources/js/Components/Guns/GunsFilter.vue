@@ -1,0 +1,88 @@
+<template>
+    <div class="mb-8">
+        <div class="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <div class="flex items-center text-slate-300">
+                    <svg class="w-5 h-5 mr-2 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                    </svg>
+                    <span class="font-medium">Filtruj broń:</span>
+                </div>
+
+                <div class="flex flex-wrap gap-2">
+                    <button
+                        @click="selectedType = null"
+                        :class="[
+                            'px-4 py-2 rounded-lg font-medium transition-all duration-200',
+                            !selectedType
+                                ? 'bg-orange-500 text-white shadow-lg'
+                                : 'bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 hover:text-white'
+                        ]"
+                    >
+                        Wszystkie
+                    </button>
+
+                    <button
+                        v-for="type in gunTypes"
+                        :key="type.id"
+                        @click="selectedType = type.id"
+                        :class="[
+                            'px-4 py-2 rounded-lg font-medium transition-all duration-200',
+                            selectedType === type.id
+                                ? 'bg-orange-500 text-white shadow-lg'
+                                : 'bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 hover:text-white'
+                        ]"
+                    >
+                        {{ type.name }}
+                    </button>
+                </div>
+            </div>
+
+            <div v-if="selectedType" class="mt-4 pt-4 border-t border-slate-700/50">
+                <div class="flex items-center text-sm text-slate-400">
+                    <span>Aktywny filtr:</span>
+                    <span class="ml-2 px-2 py-1 bg-orange-500/20 text-orange-400 rounded text-xs font-medium">
+                        {{ getSelectedTypeName() }}
+                    </span>
+                    <button
+                        @click="selectedType = null"
+                        class="ml-2 text-slate-500 hover:text-slate-300 transition-colors"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script setup>
+import {ref, computed} from 'vue';
+
+const props = defineProps({
+    gunTypes: {
+        type: Array,
+        default: () => []
+    },
+    modelValue: {
+        type: [Number, null],
+        default: null
+    }
+});
+
+const emit = defineEmits(['update:modelValue']);
+
+const selectedType = computed({
+    get: () => props.modelValue,
+    set: (value) => emit('update:modelValue', value)
+});
+
+function getSelectedTypeName() {
+    const type = props.gunTypes.find(t => t.id === props.modelValue);
+    return type ? type.name : '';
+}
+</script>
