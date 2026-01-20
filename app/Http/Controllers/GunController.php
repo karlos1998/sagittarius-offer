@@ -10,7 +10,7 @@ class GunController extends Controller
 {
     public function index()
     {
-        $guns = Gun::with(['gunType', 'caliber'])->get();
+        $guns = Gun::with(['gunType', 'caliber.ammunitions'])->get();
 
         return Inertia::render('Guns/Index', [
             'guns' => $guns

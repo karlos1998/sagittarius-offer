@@ -41,6 +41,33 @@
                 </div>
             </div>
 
+            <!-- Ammunition Section -->
+            <div v-if="gun.caliber?.ammunitions && gun.caliber.ammunitions.length > 0" class="mb-4">
+                <h4 class="text-sm font-medium text-orange-400 mb-2 flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"/>
+                    </svg>
+                    Dostępna amunicja
+                </h4>
+                <div class="space-y-1">
+                    <div
+                        v-for="ammo in gun.caliber.ammunitions"
+                        :key="ammo.id"
+                        class="flex items-center justify-between text-sm text-slate-300 bg-slate-700/30 rounded px-2 py-1"
+                    >
+                        <span class="font-medium">{{ ammo.name }}</span>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-orange-400 font-semibold">{{ ammo.club_price }}zł</span>
+                            <span class="text-slate-500 text-xs">(klub)</span>
+                            <span class="text-slate-400">/</span>
+                            <span class="text-slate-400">{{ ammo.standard_price }}zł</span>
+                            <span class="text-slate-500 text-xs">(standard)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div v-if="gun.description" class="text-slate-400 text-sm">
                 {{ gun.description }}
             </div>
