@@ -1,16 +1,20 @@
 <template>
     <div class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
         <GunsHeader/>
-        <GunsGrid :guns="guns" :gun-types="gunTypes"/>
+        <GunsGrid :guns="guns" :gun-types="gunTypes" :cart="cart" @add-to-cart="handleAddToCart"/>
         <Footer/>
+        <!-- Cart Button -->
+        <CartButton :cart="cart"/>
     </div>
 </template>
 
 <script setup>
-import {Link} from '@inertiajs/vue3';
+import {computed} from 'vue';
+import {Link, router} from '@inertiajs/vue3';
 import Footer from '../../Components/Common/Footer.vue';
 import GunsGrid from '../../Components/Guns/GunsGrid.vue';
 import GunsHeader from '../../Components/Guns/GunsHeader.vue';
+import CartButton from '../../Components/Common/CartButton.vue';
 
 defineProps({
     guns: {
@@ -20,6 +24,10 @@ defineProps({
     gunTypes: {
         type: Array,
         default: () => []
+    },
+    cart: {
+        type: Object,
+        default: () => ({})
     }
 });
 
@@ -37,5 +45,17 @@ function handleImageError(event) {
         parent.appendChild(fallback);
     }
     fallback.style.display = 'flex';
+}
+
+function handleAddToCart(gunId) {
+    router.post(route('cart.add'), {
+        gun_id: gunId
+    }, {
+        preserveScroll: true,
+        onSuccess: () => {
+            // Update cart data after successful addition
+            // This will be handled automatically by Inertia
+        }
+    });
 }
 </script>

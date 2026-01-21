@@ -16,7 +16,8 @@ class GunController extends Controller
 
         return Inertia::render('Guns/Index', [
             'guns' => $guns,
-            'gunTypes' => $gunTypes
+            'gunTypes' => $gunTypes,
+            'cart' => session()->get('cart', []),
         ]);
     }
 }
