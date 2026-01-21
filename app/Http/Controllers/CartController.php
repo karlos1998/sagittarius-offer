@@ -38,8 +38,9 @@ class CartController extends Controller
             if ($firstAmmo) {
                 $cart[$gunId] = [
                     'gun_id' => $gunId,
-                    'ammo_id' => $firstAmmo->id,
-                    'quantity' => 5, // zawsze 5 strzałów
+                    'ammunitions' => [
+                        $firstAmmo->id => 5 // zawsze 5 strzałów dla pierwszej amunicji
+                    ]
                 ];
             }
         }
@@ -63,17 +64,41 @@ class CartController extends Controller
 
         switch ($action) {
             case 'increase':
-                $cart[$gunId]['quantity'] += 5;
+                if (isset($cart[$gunId]['ammunitions'][$ammoId])) {
+                    $cart[$gunId]['ammunitions'][$ammoId] += 5;
+                } else {
+                    $cart[$gunId]['ammunitions'][$ammoId] = 5;
+                }
                 break;
             case 'decrease':
-                $cart[$gunId]['quantity'] = max(0, $cart[$gunId]['quantity'] - 5);
-                if ($cart[$gunId]['quantity'] == 0) {
-                    unset($cart[$gunId]);
+                if (isset($cart[$gunId]['ammunitions'][$ammoId])) {
+                    $cart[$gunId]['ammunitions'][$ammoId] = max(0, $cart[$gunId]['ammunitions'][$ammoId] - 5);
+                    if ($cart[$gunId]['ammunitions'][$ammoId] == 0) {
+                        unset($cart[$gunId]['ammunitions'][$ammoId]);
+                        if (empty($cart[$gunId]['ammunitions'])) {
+                            unset($cart[$gunId]);
+                        }
+                    }
+                }
+                break;
+            case 'add_ammo':
+                if (!isset($cart[$gunId]['ammunitions'][$ammoId])) {
+                    $cart[$gunId]['ammunitions'][$ammoId] = 5;
+                }
+                break;
+            case 'remove_ammo':
+                if (isset($cart[$gunId]['ammunitions'][$ammoId])) {
+                    unset($cart[$gunId]['ammunitions'][$ammoId]);
+                    if (empty($cart[$gunId]['ammunitions'])) {
+                        unset($cart[$gunId]);
+                    }
                 }
                 break;
             case 'change_ammo':
                 if ($ammoId) {
-                    $cart[$gunId]['ammo_id'] = $ammoId;
+                    if (!isset($cart[$gunId]['ammunitions'][$ammoId])) {
+                        $cart[$gunId]['ammunitions'][$ammoId] = 5;
+                    }
                 }
                 break;
             case 'remove':

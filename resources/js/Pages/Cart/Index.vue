@@ -97,7 +97,8 @@
                         :item="item"
                         :is-club-member="isClubMember"
                         @update-quantity="updateQuantity"
-                        @change-ammo="changeAmmo"
+                        @add-ammunition="addAmmunition"
+                        @remove-ammunition="removeAmmunition"
                         @remove="removeItem"
                     />
 
@@ -166,33 +167,34 @@ const cartItems = computed(() => {
         const gun = props.guns.find(g => g.id == gunId);
         if (!gun) return null;
 
-        // Ensure there is ammunition data and ammo with correct ID
-        let selectedAmmo = null;
-        if (gun.caliber?.ammunitions && Array.isArray(gun.caliber.ammunitions) && gun.caliber.ammunitions.length > 0) {
-            selectedAmmo = gun.caliber.ammunitions.find(a => a.id == cartItem.ammo_id) || gun.caliber.ammunitions[0];
-        }
+        // Get all ammunitions with their quantities
+        const ammunitionItems = Object.entries(cartItem.ammunitions || {}).map(([ammoId, quantity]) => {
+            const ammo = gun.caliber?.ammunitions?.find(a => a.id == ammoId);
+            return ammo ? {ammunition: ammo, quantity} : null;
+        }).filter(item => item !== null);
 
         return {
             gun,
             cartItem,
-            selectedAmmo
+            ammunitionItems
         };
     }).filter(item => item !== null);
 });
 
 const totalShots = computed(() => {
-    return cartItems.value.reduce((total, item) => total + item.cartItem.quantity, 0);
+    return cartItems.value.reduce((total, item) => {
+        return total + item.ammunitionItems.reduce((itemTotal, ammoItem) => itemTotal + ammoItem.quantity, 0);
+    }, 0);
 });
 
 const totalPrice = computed(() => {
     return cartItems.value.reduce((total, item) => {
-        if (!item.selectedAmmo) return total;
-
-        const pricePerShot = isClubMember.value
-            ? item.selectedAmmo.club_price
-            : item.selectedAmmo.standard_price;
-
-        return total + (pricePerShot * item.cartItem.quantity);
+        return total + item.ammunitionItems.reduce((itemTotal, ammoItem) => {
+            const pricePerShot = isClubMember.value
+                ? ammoItem.ammunition.club_price
+                : ammoItem.ammunition.standard_price;
+            return itemTotal + (pricePerShot * ammoItem.quantity);
+        }, 0);
     }, 0);
 });
 
@@ -206,19 +208,31 @@ function formatPrice(price) {
     return numericPrice.toFixed(2);
 }
 
-function updateQuantity(gunId, action) {
+function updateQuantity(gunId, ammoId, action) {
     router.post(route('cart.update'), {
         gun_id: gunId,
-        action: action
+        action: action,
+        ammo_id: ammoId
     }, {
         preserveScroll: true
     });
 }
 
-function changeAmmo(gunId, ammoId) {
+function addAmmunition(gunId, ammoId, quantity) {
     router.post(route('cart.update'), {
         gun_id: gunId,
-        action: 'change_ammo',
+        action: 'add_ammo',
+        ammo_id: ammoId,
+        quantity: quantity
+    }, {
+        preserveScroll: true
+    });
+}
+
+function removeAmmunition(gunId, ammoId) {
+    router.post(route('cart.update'), {
+        gun_id: gunId,
+        action: 'remove_ammo',
         ammo_id: ammoId
     }, {
         preserveScroll: true

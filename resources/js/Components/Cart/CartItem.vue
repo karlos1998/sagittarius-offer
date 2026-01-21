@@ -10,7 +10,7 @@
                 <button
                     @click="removeItem"
                     class="text-red-400 hover:text-red-300 transition-colors p-2 hover:bg-red-600/20 rounded-lg"
-                    title="Usuń z koszyka"
+                    title="Usuń całą broń z koszyka"
                 >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -22,80 +22,86 @@
 
         <!-- Content -->
         <div class="p-6">
-            <!-- Ammunition Selection -->
-            <div class="mb-6">
-                <label class="block text-green-200 font-medium mb-2">Wybierz amunicję:</label>
-                <select
-                    :value="item.cartItem.ammo_id"
-                    @change="changeAmmo($event.target.value)"
-                    class="w-full bg-gray-700 border border-red-600/30 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-red-500"
+            <!-- Ammunition Items -->
+            <div class="space-y-4">
+                <div
+                    v-for="ammoItem in item.ammunitionItems"
+                    :key="ammoItem.ammunition.id"
+                    class="bg-gray-700/50 rounded-lg p-4 border border-red-600/20"
                 >
-                    <option
-                        v-for="ammo in item.gun.caliber?.ammunitions || []"
-                        :key="ammo.id"
-                        :value="ammo.id"
-                    >
-                        {{ ammo.name }} -
-                        {{ isClubMember ? ammo.club_price : ammo.standard_price }}zł/szt
-                        ({{ isClubMember ? 'klub' : 'standard' }})
-                    </option>
-                </select>
-            </div>
-
-            <!-- Quantity Controls -->
-            <div class="flex items-center justify-between mb-6">
-                <div>
-                    <label class="block text-green-200 font-medium mb-2">Liczba strzałów:</label>
-                    <div class="flex items-center space-x-3">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <h4 class="text-white font-medium">{{ ammoItem.ammunition.name }}</h4>
+                            <p class="text-green-300 text-sm">
+                                Cena: {{
+                                    formatPrice(isClubMember ? ammoItem.ammunition.club_price : ammoItem.ammunition.standard_price)
+                                }} zł/szt
+                                <span class="text-yellow-400">({{ isClubMember ? 'klub' : 'standard' }})</span>
+                            </p>
+                        </div>
                         <button
-                            @click="updateQuantity('decrease')"
-                            :disabled="item.cartItem.quantity <= 5"
-                            class="w-10 h-10 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white rounded-lg flex items-center justify-center transition-colors border border-red-500 disabled:border-gray-500"
+                            @click="removeAmmo(ammoItem.ammunition.id)"
+                            class="text-red-400 hover:text-red-300 transition-colors p-1 hover:bg-red-600/20 rounded"
+                            title="Usuń tę amunicję"
                         >
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
-                            </svg>
-                        </button>
-
-                        <span class="text-white font-bold text-xl min-w-[3rem] text-center">
-                            {{ item.cartItem.quantity }}
-                        </span>
-
-                        <button
-                            @click="updateQuantity('increase')"
-                            class="w-10 h-10 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center justify-center transition-colors border border-red-500"
-                        >
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                      d="M6 18L18 6M6 6l12 12"/>
                             </svg>
                         </button>
                     </div>
-                </div>
 
-                <div class="text-right">
-                    <div class="text-green-200 text-sm">Cena za strzał:</div>
-                    <div class="text-yellow-400 font-bold">
-                        {{
-                            item.selectedAmmo ? formatPrice(isClubMember ? item.selectedAmmo.club_price : item.selectedAmmo.standard_price) : '0.00'
-                        }} zł
-                    </div>
-                </div>
-            </div>
+                    <!-- Quantity Controls -->
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <button
+                                @click="updateQuantity(ammoItem.ammunition.id, 'decrease')"
+                                :disabled="ammoItem.quantity <= 5"
+                                class="w-8 h-8 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white rounded flex items-center justify-center transition-colors border border-red-500 disabled:border-gray-500"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                                </svg>
+                            </button>
 
-            <!-- Item Total -->
-            <div class="bg-red-900/20 border border-red-600/30 rounded-lg p-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <div class="text-green-200 font-medium">{{ item.gun.name }}</div>
-                        <div class="text-green-300 text-sm">{{ item.selectedAmmo?.name || 'Brak amunicji' }}</div>
-                    </div>
-                    <div class="text-right">
-                        <div class="text-white text-sm">{{ item.cartItem.quantity }} strzałów</div>
-                        <div class="text-yellow-400 font-bold text-lg">
-                            {{ formatPrice(itemTotal) }} zł
+                            <span class="text-white font-bold text-lg min-w-[2rem] text-center">
+                                {{ ammoItem.quantity }}
+                            </span>
+
+                            <button
+                                @click="updateQuantity(ammoItem.ammunition.id, 'increase')"
+                                class="w-8 h-8 bg-red-600 hover:bg-red-700 text-white rounded flex items-center justify-center transition-colors border border-red-500"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                </svg>
+                            </button>
+
+                            <span class="text-green-300 text-sm ml-2">strzałów</span>
+                        </div>
+
+                        <div class="text-right">
+                            <div class="text-yellow-400 font-bold">
+                                {{ formatPrice(ammoTotal(ammoItem)) }} zł
+                            </div>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Add More Ammunition Button -->
+            <div v-if="availableAmmunitions.length > 0" class="mt-6 pt-4 border-t border-red-600/30">
+                <label class="block text-green-200 font-medium mb-2">Dodaj więcej amunicji:</label>
+                <div class="flex flex-wrap gap-2">
+                    <button
+                        v-for="ammo in availableAmmunitions"
+                        :key="ammo.id"
+                        @click="addAmmunition(ammo.id)"
+                        class="px-3 py-2 bg-red-600/20 hover:bg-red-600/40 text-red-300 hover:text-red-200 rounded border border-red-600/30 hover:border-red-500/50 transition-colors text-sm"
+                    >
+                        + {{ ammo.name }}
+                    </button>
                 </div>
             </div>
         </div>
@@ -116,16 +122,22 @@ const props = defineProps({
     }
 });
 
-const emit = defineEmits(['update-quantity', 'change-ammo', 'remove']);
+const emit = defineEmits(['update-quantity', 'add-ammunition', 'remove-ammunition', 'remove']);
+
+const availableAmmunitions = computed(() => {
+    if (!props.item.gun || !props.item.gun.caliber) return [];
+
+    return props.item.gun.caliber.ammunitions.filter(ammo => !props.item.ammunitionItems.some(item => item.ammunition.id === ammo.id));
+});
 
 const itemTotal = computed(() => {
-    if (!props.item.selectedAmmo) return 0;
+    return props.item.ammunitionItems.reduce((total, ammoItem) => {
+        const pricePerShot = props.isClubMember
+            ? ammoItem.ammunition.club_price
+            : ammoItem.ammunition.standard_price;
 
-    const pricePerShot = props.isClubMember
-        ? props.item.selectedAmmo.club_price
-        : props.item.selectedAmmo.standard_price;
-
-    return pricePerShot * props.item.cartItem.quantity;
+        return total + pricePerShot * ammoItem.quantity;
+    }, 0);
 });
 
 function formatPrice(price) {
@@ -138,12 +150,26 @@ function formatPrice(price) {
     return numericPrice.toFixed(2);
 }
 
-function updateQuantity(action) {
-    emit('update-quantity', props.item.gun.id, action);
+function ammoTotal(ammoItem) {
+    const pricePerShot = props.isClubMember
+        ? ammoItem.ammunition.club_price
+        : ammoItem.ammunition.standard_price;
+
+    return pricePerShot * ammoItem.quantity;
 }
 
-function changeAmmo(ammoId) {
-    emit('change-ammo', props.item.gun.id, ammoId);
+function updateQuantity(ammoId, action) {
+    emit('update-quantity', props.item.gun.id, ammoId, action);
+}
+
+function addAmmunition(ammoId) {
+    emit('add-ammunition', props.item.gun.id, ammoId);
+}
+
+function removeAmmo(ammoId) {
+    if (confirm(`Czy na pewno chcesz usunąć ${ammoId} z koszyka?`)) {
+        emit('remove-ammunition', props.item.gun.id, ammoId);
+    }
 }
 
 function removeItem() {
