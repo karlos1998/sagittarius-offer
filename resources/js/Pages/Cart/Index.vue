@@ -1,16 +1,16 @@
 <template>
-    <div class="min-h-screen bg-gradient-to-br from-black via-gray-900 to-green-950">
+    <div class="min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-950">
         <!-- Header -->
         <div class="relative overflow-hidden bg-gradient-to-br from-gray-900 to-black">
             <div class="absolute inset-0 opacity-20">
-                <div class="absolute inset-0 bg-gradient-to-br from-red-900/30 to-yellow-900/20"></div>
+                <div class="absolute inset-0 bg-gradient-to-br from-gray-800/30 to-gray-900/20"></div>
             </div>
 
             <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div class="flex items-center justify-between">
                     <div>
                         <Link :href="route('guns.index')"
-                              class="inline-flex items-center text-red-400 hover:text-red-300 mb-4 transition-colors">
+                              class="inline-flex items-center text-gray-400 hover:text-white mb-4 transition-colors">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
@@ -20,19 +20,19 @@
 
                         <h1 class="text-4xl sm:text-6xl font-bold text-white">
                             <span
-                                class="bg-gradient-to-r from-red-500 via-yellow-400 to-red-600 bg-clip-text text-transparent drop-shadow-lg">
+                                class="bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent drop-shadow-lg">
                                 KOSZYK ZAMÓWIEŃ
                             </span>
                         </h1>
 
-                        <p class="text-green-100 mt-2">
+                        <p class="text-gray-300 mt-2">
                             Zarządzaj swoimi strzałami na strzelnicy
                         </p>
                     </div>
 
                     <div class="text-right">
-                        <div class="text-green-200 text-sm mb-2">Razem strzałów: {{ totalShots }}</div>
-                        <div class="text-yellow-400 font-bold text-lg">{{ formatPrice(totalPrice) }} zł</div>
+                        <div class="text-gray-400 text-sm mb-2">Razem strzałów: {{ totalShots }}</div>
+                        <div class="text-gray-400 font-bold text-lg">{{ formatPrice(totalPrice) }} zł</div>
                     </div>
                 </div>
             </div>
@@ -41,11 +41,11 @@
         <!-- Club Member Toggle -->
         <div class="relative py-8">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="bg-gray-800/80 backdrop-blur-sm rounded-xl p-6 border-2 border-red-600/30">
+                <div class="bg-gray-800/80 backdrop-blur-sm rounded-xl p-6 border-2 border-gray-600/30">
                     <div class="flex items-center justify-between">
                         <div>
                             <h3 class="text-white font-bold text-lg">Członek Klubu Sagittarius</h3>
-                            <p class="text-green-200 text-sm mt-1">Zniżki na amunicję dla członków klubu</p>
+                            <p class="text-gray-400 text-sm mt-1">Zniżki na amunicję dla członków klubu</p>
                         </div>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input
@@ -55,7 +55,7 @@
                                 class="sr-only peer"
                             >
                             <div
-                                class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-500/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gray-500/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-600"></div>
                             <span class="ml-3 text-sm font-medium text-gray-300">
                                 {{ isClubMember ? 'TAK' : 'NIE' }}
                             </span>
@@ -70,17 +70,17 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div v-if="cartItems.length === 0" class="text-center py-16">
                     <div
-                        class="w-24 h-24 mx-auto mb-6 bg-gray-800 rounded-full flex items-center justify-center border-2 border-red-600/30">
-                        <svg class="w-12 h-12 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="w-24 h-24 mx-auto mb-6 bg-gray-800 rounded-full flex items-center justify-center border-2 border-gray-600/30">
+                        <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2 8h12l-2-8M7 13v8a2 2 0 002 2h6a2 2 0 002-2v-3"/>
                         </svg>
                     </div>
                     <h3 class="text-2xl font-semibold text-white mb-2">Koszyk jest pusty</h3>
-                    <p class="text-green-200 mb-8">Dodaj broń do koszyka, żeby zacząć rezerwację strzałów</p>
+                    <p class="text-gray-400 mb-8">Dodaj broń do koszyka, żeby zacząć rezerwację strzałów</p>
                     <Link
                         :href="route('guns.index')"
-                        class="inline-flex items-center px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition-colors border-2 border-red-500"
+                        class="inline-flex items-center px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-lg transition-colors border-2 border-gray-500"
                     >
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -103,15 +103,15 @@
                     />
 
                     <!-- Summary -->
-                    <div class="bg-gray-800/80 backdrop-blur-sm rounded-xl p-6 border-2 border-red-600/30">
+                    <div class="bg-gray-800/80 backdrop-blur-sm rounded-xl p-6 border-2 border-gray-600/30">
                         <div class="flex items-center justify-between">
                             <div>
                                 <h3 class="text-white font-bold text-xl">Podsumowanie zamówienia</h3>
-                                <p class="text-green-200 text-sm mt-1">Razem: {{ totalShots }} strzałów</p>
+                                <p class="text-gray-400 text-sm mt-1">Razem: {{ totalShots }} strzałów</p>
                             </div>
                             <div class="text-right">
-                                <div class="text-3xl font-bold text-yellow-400">{{ formatPrice(totalPrice) }} zł</div>
-                                <p class="text-green-200 text-sm mt-1">
+                                <div class="text-3xl font-bold text-gray-400">{{ formatPrice(totalPrice) }} zł</div>
+                                <p class="text-gray-400 text-sm mt-1">
                                     {{ isClubMember ? 'Cena klubowa' : 'Cena standardowa' }}
                                 </p>
                             </div>
@@ -125,7 +125,7 @@
                                 Wyczyść koszyk
                             </button>
                             <button
-                                class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition-colors border-2 border-red-500 flex-1"
+                                class="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-lg transition-colors border-2 border-gray-500 flex-1"
                             >
                                 Złóż zamówienie
                             </button>
