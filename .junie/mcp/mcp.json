@@ -1,0 +1,20 @@
+{
+    "mcpServers": {
+        "laravel-boost": {
+            "command": "/Users/kornel_rozumek/Library/Application Support/Herd/bin/php83",
+            "args": [
+                "/Users/kornel_rozumek/Herd/sagittarius-offer/artisan",
+                "boost:mcp"
+            ]
+        },
+        "herd": {
+            "command": "/Users/kornel_rozumek/Library/Application Support/Herd/bin/php83",
+            "args": [
+                "/Applications/Herd.app/Contents/Resources/herd-mcp.phar"
+            ],
+            "env": {
+                "SITE_PATH": "/Users/kornel_rozumek/Herd/sagittarius-offer"
+            }
+        }
+    }
+}

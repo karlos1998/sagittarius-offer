@@ -124,11 +124,12 @@
                             >
                                 Wyczyść koszyk
                             </button>
-                            <button
-                                class="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-lg transition-colors border-2 border-gray-500 flex-1"
+                            <Link
+                                :href="route('checkout.index')"
+                                class="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-lg transition-colors border-2 border-gray-500 flex-1 text-center"
                             >
                                 Złóż zamówienie
-                            </button>
+                            </Link>
                         </div>
                     </div>
                 </div>
