@@ -15,7 +15,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import FeatureCard from './FeatureCard.vue';
 
 const features = [

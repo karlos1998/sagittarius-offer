@@ -20,29 +20,20 @@
     </div>
 </template>
 
-<script setup>
-import {Link} from '@inertiajs/vue3';
-import {ref, onMounted} from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
+import { Link } from '@inertiajs/vue3';
+import type { CartMap } from '@/types/storefront';
+import { countCartItems } from '@/utils/cart';
 
-const props = defineProps({
-    cart: {
-        type: Object,
-        default: () => ({})
+const props = withDefaults(
+    defineProps<{
+        cart?: CartMap;
+    }>(),
+    {
+        cart: () => ({}),
     }
-});
+);
 
-const itemCount = ref(0);
-
-const updateItemCount = () => {
-    itemCount.value = Object.keys(props.cart).length;
-};
-
-onMounted(() => {
-    updateItemCount();
-});
-
-// Watch for cart changes
-import {watch} from 'vue';
-
-watch(() => props.cart, updateItemCount, {deep: true});
+const itemCount = computed(() => countCartItems(props.cart));
 </script>

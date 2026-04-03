@@ -1,7 +1,12 @@
-<script setup>
-defineProps({
-    value: String,
-});
+<script setup lang="ts">
+withDefaults(
+    defineProps<{
+        value?: string;
+    }>(),
+    {
+        value: '',
+    }
+);
 </script>
 
 <template>

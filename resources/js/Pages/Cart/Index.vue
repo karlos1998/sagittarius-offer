@@ -133,31 +133,46 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import ConfirmationModal from '../../Components/ConfirmationModal.vue';
 import Footer from '../../Components/Common/Footer.vue';
 import SimpleNavbar from '../../Components/Common/SimpleNavbar.vue';
 import CartItem from '../../Components/Cart/CartItem.vue';
+import type { CartMap, Gun } from '@/types/storefront';
+import { buildCartDisplayItems, calculateTotalPrice, calculateTotalShots } from '@/utils/cart';
+import { formatPrice } from '@/utils/format';
 
-const props = defineProps({
-    cart: {
-        type: Object,
-        default: () => ({}),
-    },
-    guns: {
-        type: Array,
-        default: () => [],
-    },
-    isClubMember: {
-        type: Boolean,
-        default: false,
-    },
-});
+type CartUpdateAction = 'increase' | 'decrease';
+type ConfirmationAction = 'remove-ammunition' | 'remove-item' | 'clear-cart' | null;
+
+interface ConfirmationState {
+    show: boolean;
+    title: string;
+    message: string;
+    action: ConfirmationAction;
+    payload: {
+        gunId?: number;
+        ammoId?: number;
+    };
+}
+
+const props = withDefaults(
+    defineProps<{
+        cart?: CartMap;
+        guns?: Gun[];
+        isClubMember?: boolean;
+    }>(),
+    {
+        cart: () => ({}),
+        guns: () => [],
+        isClubMember: false,
+    }
+);
 
 const isClubMember = ref(props.isClubMember);
-const confirmation = ref({
+const confirmation = ref<ConfirmationState>({
     show: false,
     title: '',
     message: '',
@@ -165,60 +180,12 @@ const confirmation = ref({
     payload: {},
 });
 
-const cartItems = computed(() => {
-    return Object.entries(props.cart)
-        .map(([gunId, cartItem]) => {
-            const gun = props.guns.find((g) => g.id == gunId);
-            if (!gun) {
-                return null;
-            }
+const cartItems = computed(() => buildCartDisplayItems(props.cart, props.guns, isClubMember.value));
 
-            const ammunitionItems = Object.entries(cartItem.ammunitions || {})
-                .map(([ammoId, quantity]) => {
-                    const ammo = gun.caliber?.ammunitions?.find((a) => a.id == ammoId);
-                    return ammo ? { ammunition: ammo, quantity } : null;
-                })
-                .filter((item) => item !== null);
+const totalShots = computed(() => calculateTotalShots(cartItems.value));
+const totalPrice = computed(() => calculateTotalPrice(cartItems.value));
 
-            return {
-                gun,
-                cartItem,
-                ammunitionItems,
-            };
-        })
-        .filter((item) => item !== null);
-});
-
-const totalShots = computed(() => {
-    return cartItems.value.reduce((total, item) => {
-        return total + item.ammunitionItems.reduce((itemTotal, ammoItem) => itemTotal + ammoItem.quantity, 0);
-    }, 0);
-});
-
-const totalPrice = computed(() => {
-    return cartItems.value.reduce((total, item) => {
-        return total + item.ammunitionItems.reduce((itemTotal, ammoItem) => {
-            const pricePerShot = isClubMember.value ? ammoItem.ammunition.club_price : ammoItem.ammunition.standard_price;
-            return itemTotal + pricePerShot * ammoItem.quantity;
-        }, 0);
-    }, 0);
-});
-
-function formatPrice(price) {
-    if (price === null || price === undefined) {
-        return '0.00';
-    }
-
-    const numericPrice = typeof price === 'string' ? parseFloat(price) : price;
-
-    if (isNaN(numericPrice)) {
-        return '0.00';
-    }
-
-    return numericPrice.toFixed(2);
-}
-
-function updateQuantity(gunId, ammoId, action) {
+function updateQuantity(gunId: number, ammoId: number, action: CartUpdateAction): void {
     router.post(
         route('cart.update'),
         {
@@ -232,7 +199,7 @@ function updateQuantity(gunId, ammoId, action) {
     );
 }
 
-function addAmmunition(gunId, ammoId, quantity) {
+function addAmmunition(gunId: number, ammoId: number, quantity?: number): void {
     router.post(
         route('cart.update'),
         {
@@ -247,7 +214,7 @@ function addAmmunition(gunId, ammoId, quantity) {
     );
 }
 
-function removeAmmunition(gunId, ammoId) {
+function removeAmmunition(gunId: number, ammoId: number): void {
     router.post(
         route('cart.update'),
         {
@@ -261,7 +228,7 @@ function removeAmmunition(gunId, ammoId) {
     );
 }
 
-function removeItem(gunId) {
+function removeItem(gunId: number): void {
     router.post(
         route('cart.update'),
         {
@@ -274,7 +241,7 @@ function removeItem(gunId) {
     );
 }
 
-function requestRemoveAmmunition(gunId, ammoId, ammoName) {
+function requestRemoveAmmunition(gunId: number, ammoId: number, ammoName: string): void {
     openConfirmation(
         'remove-ammunition',
         {
@@ -286,7 +253,7 @@ function requestRemoveAmmunition(gunId, ammoId, ammoName) {
     );
 }
 
-function requestRemoveItem(gunId, gunName) {
+function requestRemoveItem(gunId: number, gunName: string): void {
     openConfirmation(
         'remove-item',
         {
@@ -297,7 +264,7 @@ function requestRemoveItem(gunId, gunName) {
     );
 }
 
-function toggleClubMember() {
+function toggleClubMember(): void {
     isClubMember.value = !isClubMember.value;
     router.post(
         route('cart.toggle-club-member'),
@@ -310,7 +277,7 @@ function toggleClubMember() {
     );
 }
 
-function requestClearCart() {
+function requestClearCart(): void {
     openConfirmation(
         'clear-cart',
         {},
@@ -319,7 +286,12 @@ function requestClearCart() {
     );
 }
 
-function openConfirmation(action, payload, title, message) {
+function openConfirmation(
+    action: ConfirmationAction,
+    payload: ConfirmationState['payload'],
+    title: string,
+    message: string
+): void {
     confirmation.value = {
         show: true,
         title,
@@ -329,22 +301,26 @@ function openConfirmation(action, payload, title, message) {
     };
 }
 
-function closeConfirmation() {
+function closeConfirmation(): void {
     confirmation.value.show = false;
 }
 
-function confirmAction() {
+function confirmAction(): void {
     const { action, payload } = confirmation.value;
 
     closeConfirmation();
 
     if (action === 'remove-ammunition') {
-        removeAmmunition(payload.gunId, payload.ammoId);
+        if (payload.gunId !== undefined && payload.ammoId !== undefined) {
+            removeAmmunition(payload.gunId, payload.ammoId);
+        }
         return;
     }
 
     if (action === 'remove-item') {
-        removeItem(payload.gunId);
+        if (payload.gunId !== undefined) {
+            removeItem(payload.gunId);
+        }
         return;
     }
 

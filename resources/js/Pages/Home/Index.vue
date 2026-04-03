@@ -7,16 +7,19 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import Footer from '../../Components/Common/Footer.vue';
 import SimpleNavbar from '../../Components/Common/SimpleNavbar.vue';
 import FeaturesSection from '../../Components/Home/FeaturesSection.vue';
 import HeroSection from '../../Components/Home/HeroSection.vue';
+import type { CartMap } from '@/types/storefront';
 
-defineProps({
-    cart: {
-        type: Object,
-        default: () => ({}),
-    },
-});
+withDefaults(
+    defineProps<{
+        cart?: CartMap;
+    }>(),
+    {
+        cart: () => ({}),
+    }
+);
 </script>

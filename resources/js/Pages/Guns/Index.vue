@@ -14,33 +14,30 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { router } from '@inertiajs/vue3';
 import Footer from '../../Components/Common/Footer.vue';
 import SimpleNavbar from '../../Components/Common/SimpleNavbar.vue';
 import GunsGrid from '../../Components/Guns/GunsGrid.vue';
 import GunsHeader from '../../Components/Guns/GunsHeader.vue';
+import type { CartMap, Gun, GunPackage, GunType } from '@/types/storefront';
 
-defineProps({
-    guns: {
-        type: Array,
-        default: () => [],
-    },
-    gunTypes: {
-        type: Array,
-        default: () => [],
-    },
-    gunPackages: {
-        type: Array,
-        default: () => [],
-    },
-    cart: {
-        type: Object,
-        default: () => ({}),
-    },
-});
+withDefaults(
+    defineProps<{
+        guns?: Gun[];
+        gunTypes?: GunType[];
+        gunPackages?: GunPackage[];
+        cart?: CartMap;
+    }>(),
+    {
+        guns: () => [],
+        gunTypes: () => [],
+        gunPackages: () => [],
+        cart: () => ({}),
+    }
+);
 
-function handleAddToCart(gunId) {
+function handleAddToCart(gunId: number): void {
     router.post(
         route('cart.add'),
         {
@@ -52,7 +49,7 @@ function handleAddToCart(gunId) {
     );
 }
 
-function handleAddPackageToCart(packageId) {
+function handleAddPackageToCart(packageId: number): void {
     router.post(
         route('cart.add-package'),
         {

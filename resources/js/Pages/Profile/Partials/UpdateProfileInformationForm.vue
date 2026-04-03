@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 import { Link, router, useForm } from '@inertiajs/vue3';
 import ActionMessage from '@/Components/ActionMessage.vue';
@@ -9,9 +9,17 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 
-const props = defineProps({
-    user: Object,
-});
+interface UserProfile {
+    name: string;
+    email: string;
+    profile_photo_url: string;
+    profile_photo_path?: string | null;
+    email_verified_at?: string | null;
+}
+
+const props = defineProps<{
+    user: UserProfile;
+}>();
 
 const form = useForm({
     _method: 'PUT',
@@ -20,12 +28,12 @@ const form = useForm({
     photo: null,
 });
 
-const verificationLinkSent = ref(null);
-const photoPreview = ref(null);
-const photoInput = ref(null);
+const verificationLinkSent = ref(false);
+const photoPreview = ref<string | ArrayBuffer | null>(null);
+const photoInput = ref<HTMLInputElement | null>(null);
 
-const updateProfileInformation = () => {
-    if (photoInput.value) {
+const updateProfileInformation = (): void => {
+    if (photoInput.value?.files?.[0]) {
         form.photo = photoInput.value.files[0];
     }
 
@@ -36,29 +44,31 @@ const updateProfileInformation = () => {
     });
 };
 
-const sendEmailVerification = () => {
+const sendEmailVerification = (): void => {
     verificationLinkSent.value = true;
 };
 
-const selectNewPhoto = () => {
-    photoInput.value.click();
+const selectNewPhoto = (): void => {
+    photoInput.value?.click();
 };
 
-const updatePhotoPreview = () => {
-    const photo = photoInput.value.files[0];
+const updatePhotoPreview = (): void => {
+    const photo = photoInput.value?.files?.[0];
 
-    if (! photo) return;
+    if (! photo) {
+        return;
+    }
 
     const reader = new FileReader();
 
     reader.onload = (e) => {
-        photoPreview.value = e.target.result;
+        photoPreview.value = e.target?.result ?? null;
     };
 
     reader.readAsDataURL(photo);
 };
 
-const deletePhoto = () => {
+const deletePhoto = (): void => {
     router.delete(route('current-user-photo.destroy'), {
         preserveScroll: true,
         onSuccess: () => {
@@ -68,7 +78,7 @@ const deletePhoto = () => {
     });
 };
 
-const clearPhotoFileInput = () => {
+const clearPhotoFileInput = (): void => {
     if (photoInput.value?.value) {
         photoInput.value.value = null;
     }

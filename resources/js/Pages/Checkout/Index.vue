@@ -241,38 +241,35 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, onUnmounted, ref } from 'vue';
 import { Link, useForm } from '@inertiajs/vue3';
 import InputError from '@/Components/InputError.vue';
 import SimpleNavbar from '@/Components/Common/SimpleNavbar.vue';
+import type { CartMap, CheckoutOrder, Gun, PaymentMethodOption } from '@/types/storefront';
+import { buildCartDisplayItems, calculateTotalPrice, calculateTotalShots } from '@/utils/cart';
+import { formatPrice } from '@/utils/format';
 
-const props = defineProps({
-    cart: {
-        type: Object,
-        default: () => ({}),
-    },
-    guns: {
-        type: Array,
-        default: () => [],
-    },
-    isClubMember: {
-        type: Boolean,
-        default: false,
-    },
-    checkoutStep: {
-        type: String,
-        default: 'details',
-    },
-    paymentMethods: {
-        type: Array,
-        default: () => [],
-    },
-    order: {
-        type: Object,
-        default: null,
-    },
-});
+type CheckoutStep = 'details' | 'verify' | 'complete';
+
+const props = withDefaults(
+    defineProps<{
+        cart?: CartMap;
+        guns?: Gun[];
+        isClubMember?: boolean;
+        checkoutStep?: CheckoutStep;
+        paymentMethods?: PaymentMethodOption[];
+        order?: CheckoutOrder | null;
+    }>(),
+    {
+        cart: () => ({}),
+        guns: () => [],
+        isClubMember: false,
+        checkoutStep: 'details',
+        paymentMethods: () => [],
+        order: null,
+    }
+);
 
 const detailsForm = useForm({
     first_name: '',
@@ -312,53 +309,14 @@ const stepLabel = computed(() => {
     return '1/3 - Dane zamawiającego';
 });
 
-const cartItems = computed(() => {
-    return Object.entries(props.cart)
-        .map(([gunId, cartItem]) => {
-            const gun = props.guns.find((item) => item.id == gunId);
-
-            if (!gun) {
-                return null;
-            }
-
-            const ammunitionItems = Object.entries(cartItem.ammunitions ?? {})
-                .map(([ammoId, quantity]) => {
-                    const ammunition = gun.caliber?.ammunitions?.find((item) => item.id == ammoId);
-
-                    if (!ammunition) {
-                        return null;
-                    }
-
-                    const pricePerShot = props.isClubMember
-                        ? Number(ammunition.club_price ?? 0)
-                        : Number(ammunition.standard_price ?? 0);
-                    const shots = Number(quantity);
-
-                    return {
-                        ammunition,
-                        quantity: shots,
-                        total: pricePerShot * shots,
-                    };
-                })
-                .filter((item) => item !== null);
-
-            return {
-                gun,
-                cartItem,
-                ammunitionItems,
-            };
-        })
-        .filter((item) => item !== null);
-});
+const cartItems = computed(() => buildCartDisplayItems(props.cart, props.guns, props.isClubMember));
 
 const totalShots = computed(() => {
     if (props.checkoutStep === 'complete' && props.order) {
         return Number(props.order.total_shots ?? 0);
     }
 
-    return cartItems.value.reduce((total, item) => {
-        return total + item.ammunitionItems.reduce((itemTotal, ammoItem) => itemTotal + ammoItem.quantity, 0);
-    }, 0);
+    return calculateTotalShots(cartItems.value);
 });
 
 const totalPrice = computed(() => {
@@ -366,9 +324,7 @@ const totalPrice = computed(() => {
         return Number(props.order.total_amount ?? 0);
     }
 
-    return cartItems.value.reduce((total, item) => {
-        return total + item.ammunitionItems.reduce((itemTotal, ammoItem) => itemTotal + ammoItem.total, 0);
-    }, 0);
+    return calculateTotalPrice(cartItems.value);
 });
 
 const isCodeExpired = computed(() => {
@@ -379,29 +335,19 @@ const isCodeExpired = computed(() => {
     return new Date(props.order.verification_code_expires_at).getTime() <= currentTimestamp.value;
 });
 
-function submitOrder() {
+function submitOrder(): void {
     detailsForm.post(route('checkout.store'));
 }
 
-function verifyCode() {
+function verifyCode(): void {
     verifyForm.post(route('checkout.verify'));
 }
 
-function resendCode() {
+function resendCode(): void {
     resendForm.post(route('checkout.resend-code'));
 }
 
-function formatPrice(value) {
-    const numericValue = Number(value ?? 0);
-
-    if (Number.isNaN(numericValue)) {
-        return '0.00';
-    }
-
-    return numericValue.toFixed(2);
-}
-
-function formatDate(value) {
+function formatDate(value: string | null | undefined): string {
     if (!value) {
         return '';
     }

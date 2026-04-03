@@ -58,29 +58,32 @@
     </div>
 </template>
 
-<script setup>
-import {ref, computed} from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
+import type { GunType } from '@/types/storefront';
 
-const props = defineProps({
-    gunTypes: {
-        type: Array,
-        default: () => []
-    },
-    modelValue: {
-        type: [Number, null],
-        default: null
+const props = withDefaults(
+    defineProps<{
+        gunTypes?: GunType[];
+        modelValue?: number | null;
+    }>(),
+    {
+        gunTypes: () => [],
+        modelValue: null,
     }
-});
+);
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits<{
+    (event: 'update:modelValue', value: number | null): void;
+}>();
 
 const selectedType = computed({
     get: () => props.modelValue,
-    set: (value) => emit('update:modelValue', value)
+    set: (value: number | null) => emit('update:modelValue', value),
 });
 
-function getSelectedTypeName() {
-    const type = props.gunTypes.find(t => t.id === props.modelValue);
+function getSelectedTypeName(): string {
+    const type = props.gunTypes.find((item) => item.id === props.modelValue);
     return type ? type.name : '';
 }
 </script>

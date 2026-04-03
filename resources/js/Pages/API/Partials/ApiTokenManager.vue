@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import ActionMessage from '@/Components/ActionMessage.vue';
@@ -15,11 +15,25 @@ import SecondaryButton from '@/Components/SecondaryButton.vue';
 import SectionBorder from '@/Components/SectionBorder.vue';
 import TextInput from '@/Components/TextInput.vue';
 
-const props = defineProps({
-    tokens: Array,
-    availablePermissions: Array,
-    defaultPermissions: Array,
-});
+interface ApiToken {
+    id: number;
+    name: string;
+    abilities: string[];
+    last_used_ago?: string | null;
+}
+
+const props = withDefaults(
+    defineProps<{
+        tokens?: ApiToken[];
+        availablePermissions?: string[];
+        defaultPermissions?: string[];
+    }>(),
+    {
+        tokens: () => [],
+        availablePermissions: () => [],
+        defaultPermissions: () => [],
+    }
+);
 
 const createApiTokenForm = useForm({
     name: '',
@@ -27,16 +41,16 @@ const createApiTokenForm = useForm({
 });
 
 const updateApiTokenForm = useForm({
-    permissions: [],
+    permissions: [] as string[],
 });
 
 const deleteApiTokenForm = useForm({});
 
 const displayingToken = ref(false);
-const managingPermissionsFor = ref(null);
-const apiTokenBeingDeleted = ref(null);
+const managingPermissionsFor = ref<ApiToken | null>(null);
+const apiTokenBeingDeleted = ref<ApiToken | null>(null);
 
-const createApiToken = () => {
+const createApiToken = (): void => {
     createApiTokenForm.post(route('api-tokens.store'), {
         preserveScroll: true,
         onSuccess: () => {
@@ -46,12 +60,16 @@ const createApiToken = () => {
     });
 };
 
-const manageApiTokenPermissions = (token) => {
+const manageApiTokenPermissions = (token: ApiToken): void => {
     updateApiTokenForm.permissions = token.abilities;
     managingPermissionsFor.value = token;
 };
 
-const updateApiToken = () => {
+const updateApiToken = (): void => {
+    if (!managingPermissionsFor.value) {
+        return;
+    }
+
     updateApiTokenForm.put(route('api-tokens.update', managingPermissionsFor.value), {
         preserveScroll: true,
         preserveState: true,
@@ -59,11 +77,15 @@ const updateApiToken = () => {
     });
 };
 
-const confirmApiTokenDeletion = (token) => {
+const confirmApiTokenDeletion = (token: ApiToken): void => {
     apiTokenBeingDeleted.value = token;
 };
 
-const deleteApiToken = () => {
+const deleteApiToken = (): void => {
+    if (!apiTokenBeingDeleted.value) {
+        return;
+    }
+
     deleteApiTokenForm.delete(route('api-tokens.destroy', apiTokenBeingDeleted.value), {
         preserveScroll: true,
         preserveState: true,

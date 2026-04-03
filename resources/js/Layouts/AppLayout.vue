@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import ApplicationMark from '@/Components/ApplicationMark.vue';
@@ -8,13 +8,18 @@ import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 
-defineProps({
-    title: String,
-});
+withDefaults(
+    defineProps<{
+        title?: string;
+    }>(),
+    {
+        title: '',
+    }
+);
 
 const showingNavigationDropdown = ref(false);
 
-const switchToTeam = (team) => {
+const switchToTeam = (team: { id: number }): void => {
     router.put(route('current-team.update'), {
         team_id: team.id,
     }, {
@@ -22,7 +27,7 @@ const switchToTeam = (team) => {
     });
 };
 
-const logout = () => {
+const logout = (): void => {
     router.post(route('logout'));
 };
 </script>

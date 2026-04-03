@@ -123,34 +123,36 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
+import type { CartMap, Gun, GunPackage, GunType } from '@/types/storefront';
+import { calculateCartValueFromRawData, countCartItems } from '@/utils/cart';
+import { formatCurrencyPLN } from '@/utils/format';
 import GunCard from './GunCard.vue';
 import GunsFilter from './GunsFilter.vue';
 
-const props = defineProps({
-    guns: {
-        type: Array,
-        default: () => []
-    },
-    gunTypes: {
-        type: Array,
-        default: () => []
-    },
-    gunPackages: {
-        type: Array,
-        default: () => []
-    },
-    cart: {
-        type: Object,
-        default: () => ({})
+const props = withDefaults(
+    defineProps<{
+        guns?: Gun[];
+        gunTypes?: GunType[];
+        gunPackages?: GunPackage[];
+        cart?: CartMap;
+    }>(),
+    {
+        guns: () => [],
+        gunTypes: () => [],
+        gunPackages: () => [],
+        cart: () => ({}),
     }
-});
+);
 
-const emit = defineEmits(['add-to-cart', 'add-package-to-cart']);
+const emit = defineEmits<{
+    (event: 'add-to-cart', gunId: number): void;
+    (event: 'add-package-to-cart', packageId: number): void;
+}>();
 
-const selectedType = ref(null);
+const selectedType = ref<number | null>(null);
 
 const filteredGuns = computed(() => {
     if (!selectedType.value) {
@@ -159,11 +161,11 @@ const filteredGuns = computed(() => {
     return props.guns.filter((gun) => gun.gun_type_id === selectedType.value);
 });
 
-function handleAddToCart(gunId) {
+function handleAddToCart(gunId: number): void {
     emit('add-to-cart', gunId);
 }
 
-function handleAddPackageToCart(packageId) {
+function handleAddPackageToCart(packageId: number): void {
     emit('add-package-to-cart', packageId);
 }
 
@@ -171,7 +173,7 @@ const cartEntries = computed(() => Object.values(props.cart ?? {}));
 
 const hasCartItems = computed(() => cartEntries.value.length > 0);
 
-const cartItemsCount = computed(() => cartEntries.value.length);
+const cartItemsCount = computed(() => countCartItems(props.cart));
 
 const totalShots = computed(() =>
     cartEntries.value.reduce((sum, item) => {
@@ -180,27 +182,7 @@ const totalShots = computed(() =>
     }, 0)
 );
 
-const cartAmount = computed(() => {
-    return cartEntries.value.reduce((sum, item) => {
-        const gun = props.guns.find((candidate) => candidate.id === item?.gun_id);
-        const ammunitions = item?.ammunitions ?? {};
+const cartAmount = computed(() => calculateCartValueFromRawData(props.cart, props.guns));
 
-        const itemTotal = Object.entries(ammunitions).reduce((ammoTotal, [ammoId, quantity]) => {
-            const ammunition = gun?.caliber?.ammunitions?.find((candidate) => candidate.id === Number(ammoId));
-            const price = Number(ammunition?.standard_price ?? 0);
-
-            return ammoTotal + price * Number(quantity);
-        }, 0);
-
-        return sum + itemTotal;
-    }, 0);
-});
-
-const formattedCartAmount = computed(() =>
-    new Intl.NumberFormat('pl-PL', {
-        style: 'currency',
-        currency: 'PLN',
-        minimumFractionDigits: 2,
-    }).format(cartAmount.value)
-);
+const formattedCartAmount = computed(() => formatCurrencyPLN(cartAmount.value));
 </script>

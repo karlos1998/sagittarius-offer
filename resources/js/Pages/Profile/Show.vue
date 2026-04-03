@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import AppLayout from '@/Layouts/AppLayout.vue';
 import DeleteUserForm from '@/Pages/Profile/Partials/DeleteUserForm.vue';
 import LogoutOtherBrowserSessionsForm from '@/Pages/Profile/Partials/LogoutOtherBrowserSessionsForm.vue';
@@ -7,10 +7,27 @@ import TwoFactorAuthenticationForm from '@/Pages/Profile/Partials/TwoFactorAuthe
 import UpdatePasswordForm from '@/Pages/Profile/Partials/UpdatePasswordForm.vue';
 import UpdateProfileInformationForm from '@/Pages/Profile/Partials/UpdateProfileInformationForm.vue';
 
-defineProps({
-    confirmsTwoFactorAuthentication: Boolean,
-    sessions: Array,
-});
+interface SessionInfo {
+    agent: {
+        is_desktop: boolean;
+        platform?: string;
+        browser?: string;
+    };
+    ip_address: string;
+    is_current_device: boolean;
+    last_active: string;
+}
+
+withDefaults(
+    defineProps<{
+        confirmsTwoFactorAuthentication?: boolean;
+        sessions?: SessionInfo[];
+    }>(),
+    {
+        confirmsTwoFactorAuthentication: false,
+        sessions: () => [],
+    }
+);
 </script>
 
 <template>

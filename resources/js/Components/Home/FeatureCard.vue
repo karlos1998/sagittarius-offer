@@ -12,11 +12,14 @@
   </div>
 </template>
 
-<script setup>
-defineProps({
-  feature: {
-    type: Object,
-    required: true
-  }
-});
+<script setup lang="ts">
+interface Feature {
+    title: string;
+    description: string;
+    icon: string;
+}
+
+defineProps<{
+    feature: Feature;
+}>();
 </script>

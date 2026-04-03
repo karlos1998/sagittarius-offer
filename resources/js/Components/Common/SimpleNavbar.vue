@@ -36,20 +36,24 @@
     </nav>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue';
 import { Link } from '@inertiajs/vue3';
+import type { CartMap } from '@/types/storefront';
+import { countCartItems } from '@/utils/cart';
 
-const props = defineProps({
-    cart: {
-        type: Object,
-        default: () => ({}),
-    },
-});
+const props = withDefaults(
+    defineProps<{
+        cart?: CartMap;
+    }>(),
+    {
+        cart: () => ({}),
+    }
+);
 
-const itemCount = computed(() => Object.keys(props.cart).length);
+const itemCount = computed(() => countCartItems(props.cart));
 
-function linkClass(isActive) {
+function linkClass(isActive: boolean): string[] {
     return [
         'rounded border px-2 py-1 transition-colors',
         isActive

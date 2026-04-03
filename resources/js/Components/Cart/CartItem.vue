@@ -115,69 +115,61 @@
     </div>
 </template>
 
-<script setup>
-import {computed} from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
+import type { Ammunition, CartDisplayItem } from '@/types/storefront';
+import { formatPrice, toNumber } from '@/utils/format';
 
-const props = defineProps({
-    item: {
-        type: Object,
-        required: true
-    },
-    isClubMember: {
-        type: Boolean,
-        default: false
+type CartQuantityAction = 'increase' | 'decrease';
+
+const props = withDefaults(
+    defineProps<{
+        item: CartDisplayItem;
+        isClubMember?: boolean;
+    }>(),
+    {
+        isClubMember: false,
     }
-});
+);
 
-const emit = defineEmits(['update-quantity', 'add-ammunition', 'remove-ammunition', 'remove']);
+const emit = defineEmits<{
+    (event: 'update-quantity', gunId: number, ammoId: number, action: CartQuantityAction): void;
+    (event: 'add-ammunition', gunId: number, ammoId: number): void;
+    (event: 'remove-ammunition', gunId: number, ammoId: number, ammoName: string): void;
+    (event: 'remove', gunId: number, gunName: string): void;
+}>();
 
 const availableAmmunitions = computed(() => {
-    if (!props.item.gun || !props.item.gun.caliber) return [];
+    if (!props.item.gun || !props.item.gun.caliber) {
+        return [];
+    }
 
-    return props.item.gun.caliber.ammunitions.filter(ammo => !props.item.ammunitionItems.some(item => item.ammunition.id === ammo.id));
+    return (props.item.gun.caliber.ammunitions ?? []).filter(
+        (ammo) => !props.item.ammunitionItems.some((item) => item.ammunition.id === ammo.id)
+    );
 });
 
-const itemTotal = computed(() => {
-    return props.item.ammunitionItems.reduce((total, ammoItem) => {
-        const pricePerShot = props.isClubMember
-            ? ammoItem.ammunition.club_price
-            : ammoItem.ammunition.standard_price;
-
-        return total + pricePerShot * ammoItem.quantity;
-    }, 0);
-});
-
-function formatPrice(price) {
-    if (price === null || price === undefined) return '0.00';
-
-    const numericPrice = typeof price === 'string' ? parseFloat(price) : price;
-
-    if (isNaN(numericPrice)) return '0.00';
-
-    return numericPrice.toFixed(2);
-}
-
-function ammoTotal(ammoItem) {
+function ammoTotal(ammoItem: { ammunition: Ammunition; quantity: number }): number {
     const pricePerShot = props.isClubMember
-        ? ammoItem.ammunition.club_price
-        : ammoItem.ammunition.standard_price;
+        ? toNumber(ammoItem.ammunition.club_price)
+        : toNumber(ammoItem.ammunition.standard_price);
 
     return pricePerShot * ammoItem.quantity;
 }
 
-function updateQuantity(ammoId, action) {
+function updateQuantity(ammoId: number, action: CartQuantityAction): void {
     emit('update-quantity', props.item.gun.id, ammoId, action);
 }
 
-function addAmmunition(ammoId) {
+function addAmmunition(ammoId: number): void {
     emit('add-ammunition', props.item.gun.id, ammoId);
 }
 
-function removeAmmo(ammoId, ammoName) {
+function removeAmmo(ammoId: number, ammoName: string): void {
     emit('remove-ammunition', props.item.gun.id, ammoId, ammoName);
 }
 
-function removeItem() {
+function removeItem(): void {
     emit('remove', props.item.gun.id, props.item.gun.name);
 }
 </script>
