@@ -1,5 +1,5 @@
 <template>
-    <div class="py-8">
+    <div class="relative py-8">
         <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
             <div v-if="gunPackages.length > 0" class="mb-8 rounded border border-black/30 bg-white p-4">
                 <div class="mb-4 flex items-center gap-2">
@@ -95,11 +95,37 @@
                 />
             </div>
         </div>
+
+        <div
+            v-if="hasCartItems"
+            class="fixed bottom-4 left-1/2 z-40 w-[calc(100%-1.5rem)] max-w-4xl -translate-x-1/2 rounded-xl border border-black bg-white p-3 shadow-[0_10px_30px_rgba(0,0,0,0.18)] sm:bottom-6 sm:p-4"
+        >
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-[0.16em] text-black/50">Masz już coś w koszyku</p>
+                    <p class="mt-1 text-base font-semibold text-black sm:text-lg">
+                        {{ formattedCartAmount }}
+                    </p>
+                    <p class="text-sm text-black/60">
+                        {{ cartItemsCount }} {{ cartItemsCount === 1 ? 'pozycja' : 'pozycji' }},
+                        {{ totalShots }} {{ totalShots === 1 ? 'strzał' : 'strzałów' }}
+                    </p>
+                </div>
+
+                <Link
+                    :href="route('cart.index')"
+                    class="inline-flex items-center justify-center rounded border border-black bg-black px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white hover:text-black"
+                >
+                    Przejdź do koszyka
+                </Link>
+            </div>
+        </div>
     </div>
 </template>
 
 <script setup>
-import {ref, computed} from 'vue';
+import { Link } from '@inertiajs/vue3';
+import { computed, ref } from 'vue';
 import GunCard from './GunCard.vue';
 import GunsFilter from './GunsFilter.vue';
 
@@ -130,7 +156,7 @@ const filteredGuns = computed(() => {
     if (!selectedType.value) {
         return props.guns;
     }
-    return props.guns.filter(gun => gun.gun_type_id === selectedType.value);
+    return props.guns.filter((gun) => gun.gun_type_id === selectedType.value);
 });
 
 function handleAddToCart(gunId) {
@@ -140,4 +166,41 @@ function handleAddToCart(gunId) {
 function handleAddPackageToCart(packageId) {
     emit('add-package-to-cart', packageId);
 }
+
+const cartEntries = computed(() => Object.values(props.cart ?? {}));
+
+const hasCartItems = computed(() => cartEntries.value.length > 0);
+
+const cartItemsCount = computed(() => cartEntries.value.length);
+
+const totalShots = computed(() =>
+    cartEntries.value.reduce((sum, item) => {
+        const ammunitions = item?.ammunitions ?? {};
+        return sum + Object.values(ammunitions).reduce((ammoSum, quantity) => ammoSum + Number(quantity), 0);
+    }, 0)
+);
+
+const cartAmount = computed(() => {
+    return cartEntries.value.reduce((sum, item) => {
+        const gun = props.guns.find((candidate) => candidate.id === item?.gun_id);
+        const ammunitions = item?.ammunitions ?? {};
+
+        const itemTotal = Object.entries(ammunitions).reduce((ammoTotal, [ammoId, quantity]) => {
+            const ammunition = gun?.caliber?.ammunitions?.find((candidate) => candidate.id === Number(ammoId));
+            const price = Number(ammunition?.standard_price ?? 0);
+
+            return ammoTotal + price * Number(quantity);
+        }, 0);
+
+        return sum + itemTotal;
+    }, 0);
+});
+
+const formattedCartAmount = computed(() =>
+    new Intl.NumberFormat('pl-PL', {
+        style: 'currency',
+        currency: 'PLN',
+        minimumFractionDigits: 2,
+    }).format(cartAmount.value)
+);
 </script>
