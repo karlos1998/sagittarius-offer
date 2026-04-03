@@ -51,6 +51,6 @@ class UpdateCartRequest extends FormRequest
      */
     public function getAmmoId(): ?int
     {
-        return $this->validated()['ammo_id'];
+        return $this->validated('ammo_id');
     }
 }

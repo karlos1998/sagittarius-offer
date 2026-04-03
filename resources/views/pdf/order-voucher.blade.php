@@ -207,7 +207,18 @@
         <tbody>
         @foreach($order->items as $item)
             <tr>
-                <td>{{ $item->gun_name }} / {{ $item->ammunition_name }}</td>
+                <td>
+                    {{ $item->gun_name }} / {{ $item->ammunition_name }}
+                    @if(!empty($item->gun_package_name))
+                        <br>
+                        <span style="font-size: 10px; color: #4b5563;">
+                            Pakiet: {{ $item->gun_package_name }}
+                            @if(!empty($item->gun_package_guns_summary))
+                                ({{ $item->gun_package_guns_summary }})
+                            @endif
+                        </span>
+                    @endif
+                </td>
                 <td>{{ $item->quantity }}</td>
                 <td>{{ number_format((float) $item->line_total, 2, ',', ' ') }} zł</td>
             </tr>

@@ -65,8 +65,8 @@
                         :is-club-member="isClubMember"
                         @update-quantity="updateQuantity"
                         @add-ammunition="addAmmunition"
-                        @remove-ammunition="removeAmmunition"
-                        @remove="removeItem"
+                        @remove-ammunition="requestRemoveAmmunition"
+                        @remove="requestRemoveItem"
                     />
 
                     <div class="rounded border border-black bg-white p-6">
@@ -83,7 +83,7 @@
 
                         <div class="mt-5 flex flex-col gap-3 sm:flex-row">
                             <button
-                                @click="clearCart"
+                                @click="requestClearCart"
                                 class="rounded border border-black px-5 py-2 text-sm font-medium hover:bg-black hover:text-white"
                             >
                                 Wyczyść koszyk
@@ -100,6 +100,35 @@
             </div>
         </div>
 
+        <ConfirmationModal :show="confirmation.show" @close="closeConfirmation">
+            <template #title>
+                {{ confirmation.title }}
+            </template>
+
+            <template #content>
+                {{ confirmation.message }}
+            </template>
+
+            <template #footer>
+                <div class="flex flex-wrap justify-end gap-2">
+                    <button
+                        type="button"
+                        class="rounded border border-black px-4 py-2 text-sm font-medium text-black hover:bg-black hover:text-white"
+                        @click="closeConfirmation"
+                    >
+                        Anuluj
+                    </button>
+                    <button
+                        type="button"
+                        class="rounded border border-black bg-black px-4 py-2 text-sm font-medium text-white hover:bg-white hover:text-black"
+                        @click="confirmAction"
+                    >
+                        Usuń
+                    </button>
+                </div>
+            </template>
+        </ConfirmationModal>
+
         <Footer />
     </div>
 </template>
@@ -107,6 +136,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
+import ConfirmationModal from '../../Components/ConfirmationModal.vue';
 import Footer from '../../Components/Common/Footer.vue';
 import SimpleNavbar from '../../Components/Common/SimpleNavbar.vue';
 import CartItem from '../../Components/Cart/CartItem.vue';
@@ -127,6 +157,13 @@ const props = defineProps({
 });
 
 const isClubMember = ref(props.isClubMember);
+const confirmation = ref({
+    show: false,
+    title: '',
+    message: '',
+    action: null,
+    payload: {},
+});
 
 const cartItems = computed(() => {
     return Object.entries(props.cart)
@@ -237,6 +274,29 @@ function removeItem(gunId) {
     );
 }
 
+function requestRemoveAmmunition(gunId, ammoId, ammoName) {
+    openConfirmation(
+        'remove-ammunition',
+        {
+            gunId,
+            ammoId,
+        },
+        'Usuwanie amunicji',
+        `Czy na pewno chcesz usunąć amunicję "${ammoName}" z koszyka?`
+    );
+}
+
+function requestRemoveItem(gunId, gunName) {
+    openConfirmation(
+        'remove-item',
+        {
+            gunId,
+        },
+        'Usuwanie broni',
+        `Czy na pewno chcesz usunąć broń "${gunName}" z koszyka?`
+    );
+}
+
 function toggleClubMember() {
     isClubMember.value = !isClubMember.value;
     router.post(
@@ -250,8 +310,45 @@ function toggleClubMember() {
     );
 }
 
-function clearCart() {
-    if (confirm('Czy na pewno chcesz wyczyścić cały koszyk?')) {
+function requestClearCart() {
+    openConfirmation(
+        'clear-cart',
+        {},
+        'Wyczyszczenie koszyka',
+        'Czy na pewno chcesz usunąć wszystkie pozycje z koszyka?'
+    );
+}
+
+function openConfirmation(action, payload, title, message) {
+    confirmation.value = {
+        show: true,
+        title,
+        message,
+        action,
+        payload,
+    };
+}
+
+function closeConfirmation() {
+    confirmation.value.show = false;
+}
+
+function confirmAction() {
+    const { action, payload } = confirmation.value;
+
+    closeConfirmation();
+
+    if (action === 'remove-ammunition') {
+        removeAmmunition(payload.gunId, payload.ammoId);
+        return;
+    }
+
+    if (action === 'remove-item') {
+        removeItem(payload.gunId);
+        return;
+    }
+
+    if (action === 'clear-cart') {
         router.post(
             route('cart.clear'),
             {},

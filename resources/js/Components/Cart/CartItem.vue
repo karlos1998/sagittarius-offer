@@ -6,6 +6,9 @@
                 <div>
                     <h3 class="text-lg font-semibold">{{ item.gun.name }}</h3>
                     <p class="text-sm text-black/60">{{ item.gun.gun_type?.name }} • {{ item.gun.caliber?.name }}</p>
+                    <p v-if="item.cartItem?.package_name" class="mt-1 inline-flex items-center gap-1 rounded border border-amber-300 bg-amber-100 px-2 py-0.5 text-xs font-medium text-black">
+                        Pakiet: {{ item.cartItem.package_name }}
+                    </p>
                 </div>
                 <button
                     @click="removeItem"
@@ -39,7 +42,7 @@
                             </p>
                         </div>
                         <button
-                            @click="removeAmmo(ammoItem.ammunition.id)"
+                            @click="removeAmmo(ammoItem.ammunition.id, ammoItem.ammunition.name)"
                             class="rounded p-1 text-black/50 transition-colors hover:bg-black hover:text-white"
                             title="Usuń tę amunicję"
                         >
@@ -100,6 +103,13 @@
                         + {{ ammo.name }}
                     </button>
                 </div>
+            </div>
+
+            <div v-if="item.cartItem?.package_guns?.length" class="mt-6 rounded border border-black/20 bg-black/[0.02] p-3">
+                <p class="mb-2 text-xs font-medium uppercase tracking-wide text-black/50">Broń w pakiecie</p>
+                <p class="text-sm text-black/70">
+                    {{ item.cartItem.package_guns.join(', ') }}
+                </p>
             </div>
         </div>
     </div>
@@ -163,15 +173,11 @@ function addAmmunition(ammoId) {
     emit('add-ammunition', props.item.gun.id, ammoId);
 }
 
-function removeAmmo(ammoId) {
-    if (confirm(`Czy na pewno chcesz usunąć ${ammoId} z koszyka?`)) {
-        emit('remove-ammunition', props.item.gun.id, ammoId);
-    }
+function removeAmmo(ammoId, ammoName) {
+    emit('remove-ammunition', props.item.gun.id, ammoId, ammoName);
 }
 
 function removeItem() {
-    if (confirm(`Czy na pewno chcesz usunąć ${props.item.gun.name} z koszyka?`)) {
-        emit('remove', props.item.gun.id);
-    }
+    emit('remove', props.item.gun.id, props.item.gun.name);
 }
 </script>

@@ -24,6 +24,7 @@ Route::get('/guns', [GunController::class, 'index'])->name('guns.index');
 Route::prefix('cart')->group(function () {
     Route::get('/', [CartController::class, 'index'])->name('cart.index');
     Route::post('/add', [CartController::class, 'add'])->name('cart.add');
+    Route::post('/add-package', [CartController::class, 'addPackage'])->name('cart.add-package');
     Route::post('/update', [CartController::class, 'update'])->name('cart.update');
     Route::post('/toggle-club-member', [CartController::class, 'toggleClubMember'])->name('cart.toggle-club-member');
     Route::post('/clear', [CartController::class, 'clear'])->name('cart.clear');

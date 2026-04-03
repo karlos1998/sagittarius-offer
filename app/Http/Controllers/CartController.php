@@ -2,20 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Cart\AddPackageToCartRequest;
 use App\Http\Requests\Cart\AddToCartRequest;
 use App\Http\Requests\Cart\ToggleClubMemberRequest;
 use App\Http\Requests\Cart\UpdateCartRequest;
 use App\Services\CartService;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class CartController extends Controller
 {
     public function __construct(
         private CartService $cartService
-    )
-    {
-    }
+    ) {}
 
     public function index()
     {
@@ -24,6 +22,7 @@ class CartController extends Controller
         return Inertia::render('Cart/Index', [
             'cart' => $cartData['cart'],
             'guns' => $cartData['guns'],
+            'gunPackages' => $cartData['gunPackages'],
             'isClubMember' => $this->cartService->isClubMember(),
         ]);
     }
@@ -33,6 +32,13 @@ class CartController extends Controller
         $this->cartService->addGun($request->getGunId());
 
         return back()->with('success', 'Broń została dodana do koszyka');
+    }
+
+    public function addPackage(AddPackageToCartRequest $request)
+    {
+        $this->cartService->addPackage($request->getPackageId());
+
+        return back()->with('success', 'Pakiet został dodany do koszyka');
     }
 
     public function update(UpdateCartRequest $request)

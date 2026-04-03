@@ -45,6 +45,7 @@ class OrderInfolist
                     ->columnSpanFull()
                     ->table([
                         TableColumn::make('Broń'),
+                        TableColumn::make('Pakiet'),
                         TableColumn::make('Amunicja'),
                         TableColumn::make('Strzały'),
                         TableColumn::make('Cena/strzał'),
@@ -52,6 +53,8 @@ class OrderInfolist
                     ])
                     ->schema([
                         TextEntry::make('gun_name'),
+                        TextEntry::make('gun_package_name')
+                            ->placeholder('-'),
                         TextEntry::make('ammunition_name'),
                         TextEntry::make('quantity'),
                         TextEntry::make('price_per_shot')

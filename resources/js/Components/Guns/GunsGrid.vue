@@ -1,6 +1,61 @@
 <template>
     <div class="py-8">
         <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div v-if="gunPackages.length > 0" class="mb-8 rounded border border-black/30 bg-white p-4">
+                <div class="mb-4 flex items-center gap-2">
+                    <span class="inline-block h-2 w-2 rounded-full bg-amber-300" />
+                    <h2 class="text-lg font-semibold">Gotowe pakiety</h2>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                    <article
+                        v-for="gunPackage in gunPackages"
+                        :key="gunPackage.id"
+                        class="overflow-hidden rounded border border-black/20"
+                    >
+                        <div class="aspect-video border-b border-black/20 bg-black/[0.02]">
+                            <img
+                                v-if="gunPackage.preview_image_url || gunPackage.preview_image"
+                                :src="gunPackage.preview_image_url || gunPackage.preview_image"
+                                :alt="gunPackage.name"
+                                class="h-full w-full object-cover"
+                            >
+                            <div v-else class="flex h-full w-full items-center justify-center text-black/40">
+                                Brak zdjęcia pakietu
+                            </div>
+                        </div>
+
+                        <div class="p-4">
+                            <div class="flex items-start justify-between gap-3">
+                                <div>
+                                    <h3 class="text-base font-semibold">{{ gunPackage.name }}</h3>
+                                    <p v-if="gunPackage.description" class="mt-1 text-sm text-black/60">{{ gunPackage.description }}</p>
+                                </div>
+                                <button
+                                    class="shrink-0 rounded border border-black bg-black px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-white hover:text-black"
+                                    @click="handleAddPackageToCart(gunPackage.id)"
+                                >
+                                    Dodaj pakiet
+                                </button>
+                            </div>
+
+                            <p class="mb-2 mt-3 text-xs font-medium uppercase tracking-wide text-black/50">Pozycje pakietu</p>
+                            <ul class="space-y-1 text-sm">
+                                <li v-for="packageGun in gunPackage.package_guns" :key="packageGun.id" class="flex items-center gap-2">
+                                    <span class="inline-block h-1.5 w-1.5 rounded-full bg-black/70" />
+                                    <span>{{ packageGun.gun?.name ?? 'Broń usunięta' }}</span>
+                                    <span class="text-black/50">
+                                        -
+                                        {{ packageGun.shots_quantity }} strzałów
+                                        ({{ packageGun.ammunition?.name ?? 'Amunicja niedostępna' }})
+                                    </span>
+                                </li>
+                            </ul>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
             <GunsFilter
                 :gun-types="gunTypes"
                 :model-value="selectedType"
@@ -57,13 +112,17 @@ const props = defineProps({
         type: Array,
         default: () => []
     },
+    gunPackages: {
+        type: Array,
+        default: () => []
+    },
     cart: {
         type: Object,
         default: () => ({})
     }
 });
 
-const emit = defineEmits(['add-to-cart']);
+const emit = defineEmits(['add-to-cart', 'add-package-to-cart']);
 
 const selectedType = ref(null);
 
@@ -76,5 +135,9 @@ const filteredGuns = computed(() => {
 
 function handleAddToCart(gunId) {
     emit('add-to-cart', gunId);
+}
+
+function handleAddPackageToCart(packageId) {
+    emit('add-package-to-cart', packageId);
 }
 </script>

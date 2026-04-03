@@ -2,7 +2,14 @@
     <div class="min-h-screen bg-white text-black">
         <SimpleNavbar :cart="cart" />
         <GunsHeader />
-        <GunsGrid :guns="guns" :gun-types="gunTypes" :cart="cart" @add-to-cart="handleAddToCart" />
+        <GunsGrid
+            :guns="guns"
+            :gun-types="gunTypes"
+            :gun-packages="gunPackages"
+            :cart="cart"
+            @add-to-cart="handleAddToCart"
+            @add-package-to-cart="handleAddPackageToCart"
+        />
         <Footer />
     </div>
 </template>
@@ -23,6 +30,10 @@ defineProps({
         type: Array,
         default: () => [],
     },
+    gunPackages: {
+        type: Array,
+        default: () => [],
+    },
     cart: {
         type: Object,
         default: () => ({}),
@@ -34,6 +45,18 @@ function handleAddToCart(gunId) {
         route('cart.add'),
         {
             gun_id: gunId,
+        },
+        {
+            preserveScroll: true,
+        }
+    );
+}
+
+function handleAddPackageToCart(packageId) {
+    router.post(
+        route('cart.add-package'),
+        {
+            package_id: packageId,
         },
         {
             preserveScroll: true,

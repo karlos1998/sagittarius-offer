@@ -36,6 +36,15 @@
                         <div class="space-y-4">
                             <div v-for="(item, index) in cartItems" :key="index" class="rounded border border-black/20 p-4">
                                 <div class="font-medium">{{ item.gun.name }}</div>
+                                <p
+                                    v-if="item.cartItem?.package_name"
+                                    class="mt-1 inline-flex items-center gap-1 rounded border border-amber-300 bg-amber-100 px-2 py-0.5 text-xs font-medium text-black"
+                                >
+                                    Pakiet: {{ item.cartItem.package_name }}
+                                </p>
+                                <p v-if="item.cartItem?.package_guns?.length" class="mt-1 text-xs text-black/60">
+                                    Broń w pakiecie: {{ item.cartItem.package_guns.join(', ') }}
+                                </p>
                                 <ul class="mt-2 space-y-1 text-sm text-black/70">
                                     <li v-for="ammo in item.ammunitionItems" :key="ammo.ammunition.id" class="flex justify-between gap-4">
                                         <span>{{ ammo.ammunition.name }} ({{ ammo.quantity }} strzałów)</span>
@@ -205,6 +214,19 @@
                             Zamówienie zostało potwierdzone. Wysłaliśmy PDF na adres e-mail i możesz pobrać go również tutaj.
                         </p>
 
+                        <div v-if="order.items?.length" class="mb-6 rounded border border-black/20 p-4">
+                            <h3 class="mb-2 text-sm font-semibold uppercase tracking-wide text-black/60">Pozycje zamówienia</h3>
+                            <ul class="space-y-2 text-sm">
+                                <li v-for="(item, index) in order.items" :key="index" class="border-b border-black/10 pb-2 last:border-0 last:pb-0">
+                                    <div class="font-medium">{{ item.gun_name }} / {{ item.ammunition_name }}</div>
+                                    <div v-if="item.gun_package_name" class="text-black/70">
+                                        Pakiet: {{ item.gun_package_name }}
+                                        <span v-if="item.gun_package_guns_summary">({{ item.gun_package_guns_summary }})</span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+
                         <a
                             v-if="order.download_url"
                             :href="order.download_url"
@@ -322,6 +344,7 @@ const cartItems = computed(() => {
 
             return {
                 gun,
+                cartItem,
                 ammunitionItems,
             };
         })

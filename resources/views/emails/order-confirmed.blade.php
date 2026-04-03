@@ -62,6 +62,15 @@
                                 <tr>
                                     <td style="padding: 10px; font-size: 13px; color: #111827; border-bottom: 1px solid #f3f4f6;">
                                         {{ $item->gun_name }} / {{ $item->ammunition_name }}
+                                        @if(!empty($item->gun_package_name))
+                                            <br>
+                                            <span style="font-size: 11px; color: #6b7280;">
+                                                Pakiet: {{ $item->gun_package_name }}
+                                                @if(!empty($item->gun_package_guns_summary))
+                                                    ({{ $item->gun_package_guns_summary }})
+                                                @endif
+                                            </span>
+                                        @endif
                                     </td>
                                     <td align="right" style="padding: 10px; font-size: 13px; color: #111827; border-bottom: 1px solid #f3f4f6;">
                                         {{ $item->quantity }}

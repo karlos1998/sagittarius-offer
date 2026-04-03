@@ -15,8 +15,11 @@ class OrderItem extends Model
         'order_id',
         'gun_id',
         'ammunition_id',
+        'gun_package_id',
         'gun_name',
         'ammunition_name',
+        'gun_package_name',
+        'gun_package_guns_summary',
         'quantity',
         'price_per_shot',
         'line_total',
@@ -25,6 +28,7 @@ class OrderItem extends Model
     protected function casts(): array
     {
         return [
+            'gun_package_id' => 'integer',
             'price_per_shot' => 'decimal:2',
             'line_total' => 'decimal:2',
         ];
@@ -43,5 +47,10 @@ class OrderItem extends Model
     public function ammunition(): BelongsTo
     {
         return $this->belongsTo(Ammunition::class);
+    }
+
+    public function gunPackage(): BelongsTo
+    {
+        return $this->belongsTo(GunPackage::class);
     }
 }

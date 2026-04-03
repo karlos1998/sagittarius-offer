@@ -5,9 +5,10 @@ namespace Database\Seeders;
 use App\Models\Ammunition;
 use App\Models\Caliber;
 use App\Models\Gun;
+use App\Models\GunPackage;
 use App\Models\GunType;
-use Illuminate\Database\Seeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
 
 class GunsSeeder extends Seeder
 {
@@ -239,6 +240,83 @@ class GunsSeeder extends Seeder
                     'photos' => [],
                 ],
             );
+        }
+
+        $gunModelsByName = Gun::query()
+            ->whereIn('name', collect($guns)->pluck('name')->all())
+            ->get()
+            ->keyBy('name');
+
+        $ammunitionModelsByName = Ammunition::query()
+            ->whereIn('name', collect($ammo)->pluck('name')->all())
+            ->get()
+            ->keyBy('name');
+
+        $packages = [
+            [
+                'name' => 'Pakiet Military USA',
+                'description' => 'Klasyczny zestaw platform AR i strzelby bojowej inspirowany konfiguracjami używanymi w USA.',
+                'items' => [
+                    ['gun' => 'BURGU BRG55 (AR-15)', 'ammo' => '5.56x45 / .223 Rem', 'shots' => 10],
+                    ['gun' => 'Diamondback DB15 (AR-15)', 'ammo' => '5.56x45 / .223 Rem', 'shots' => 10],
+                    ['gun' => 'Mossberg 500', 'ammo' => '12/70 Śrut', 'shots' => 5],
+                ],
+            ],
+            [
+                'name' => 'Pakiet Klasyka 9mm',
+                'description' => 'Zestaw popularnych konstrukcji 9x19 do treningu statycznego i dynamicznego.',
+                'items' => [
+                    ['gun' => 'CZ 75 Shadow 1 (SP-01 Shadow)', 'ammo' => '9x19', 'shots' => 5],
+                    ['gun' => 'Glock 19', 'ammo' => '9x19', 'shots' => 5],
+                    ['gun' => 'Springfield Echelon', 'ammo' => '9x19', 'shots' => 5],
+                ],
+            ],
+            [
+                'name' => 'Pakiet AK i Wschód',
+                'description' => 'Pakiet dla fanów platformy AK i historycznych konstrukcji wschodnich.',
+                'items' => [
+                    ['gun' => 'WBP Jack 556', 'ammo' => '5.56x45 / .223 Rem', 'shots' => 10],
+                    ['gun' => 'WBP Mini Jack (7.62x39)', 'ammo' => '7.62x39', 'shots' => 10],
+                    ['gun' => 'Mosin-Nagant (np. 91/30)', 'ammo' => '7.62x54R (Mosin)', 'shots' => 5],
+                ],
+            ],
+            [
+                'name' => 'Pakiet Sport .22 LR',
+                'description' => 'Niski odrzut i wysoka powtarzalność: idealny pakiet na szkolenie i precyzję.',
+                'items' => [
+                    ['gun' => 'Ruger Mark IV 22/45', 'ammo' => '.22 LR', 'shots' => 10],
+                    ['gun' => 'CZ 457', 'ammo' => '.22 LR', 'shots' => 10],
+                    ['gun' => 'Hämmerli TAC R1 (.22 LR)', 'ammo' => '.22 LR', 'shots' => 10],
+                ],
+            ],
+        ];
+
+        foreach ($packages as $packageData) {
+            $package = GunPackage::query()->updateOrCreate(
+                ['name' => $packageData['name']],
+                [
+                    'description' => $packageData['description'],
+                    'is_active' => true,
+                ],
+            );
+
+            $package->packageGuns()->delete();
+
+            collect($packageData['items'])->each(function (array $itemData, int $index) use ($package, $gunModelsByName, $ammunitionModelsByName): void {
+                $gunId = $gunModelsByName->get($itemData['gun'])?->id;
+                $ammunitionId = $ammunitionModelsByName->get($itemData['ammo'])?->id;
+
+                if (! $gunId || ! $ammunitionId) {
+                    return;
+                }
+
+                $package->packageGuns()->create([
+                    'gun_id' => $gunId,
+                    'ammunition_id' => $ammunitionId,
+                    'shots_quantity' => max((int) $itemData['shots'], 1),
+                    'sort_order' => $index + 1,
+                ]);
+            });
         }
     }
 }

@@ -32,7 +32,7 @@ class CheckoutService
     ) {}
 
     /**
-     * @return array{cart: array<int|string, mixed>, guns: Collection<int, mixed>}
+     * @return array{cart: array<int|string, mixed>, guns: Collection<int, mixed>, gunPackages: Collection<int, mixed>}
      */
     public function getCartWithGuns(): array
     {
@@ -253,6 +253,8 @@ class CheckoutService
                 ->map(fn ($item): array => [
                     'gun_name' => $item->gun_name,
                     'ammunition_name' => $item->ammunition_name,
+                    'gun_package_name' => $item->gun_package_name,
+                    'gun_package_guns_summary' => $item->gun_package_guns_summary,
                     'quantity' => $item->quantity,
                     'price_per_shot' => $item->price_per_shot,
                     'line_total' => $item->line_total,
@@ -298,8 +300,13 @@ class CheckoutService
                 $items[] = [
                     'gun_id' => $gun->id,
                     'ammunition_id' => $ammunition->id,
+                    'gun_package_id' => $cartItem['package_id'] ?? null,
                     'gun_name' => $gun->name,
                     'ammunition_name' => $ammunition->name,
+                    'gun_package_name' => $cartItem['package_name'] ?? null,
+                    'gun_package_guns_summary' => isset($cartItem['package_guns']) && is_array($cartItem['package_guns'])
+                        ? implode(', ', $cartItem['package_guns'])
+                        : null,
                     'quantity' => $shotsQuantity,
                     'price_per_shot' => $pricePerShot,
                     'line_total' => $lineTotal,
