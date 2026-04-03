@@ -1,23 +1,22 @@
 <template>
     <div class="mb-8">
-        <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 border-2 border-gray-600/30 shadow-2xl">
-            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                <div class="flex items-center text-gray-300">
-                    <svg class="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+        <div class="rounded border border-black/30 bg-white p-4">
+            <div class="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+                <div class="flex items-center text-black/80">
+                    <svg class="mr-2 h-5 w-5 text-black/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                     </svg>
-                    <span class="font-medium">Filtruj broń:</span>
+                    <span class="text-sm font-medium">Filtruj broń:</span>
                 </div>
 
                 <div class="flex flex-wrap gap-2">
                     <button
                         @click="selectedType = null"
                         :class="[
-                            'px-4 py-2 rounded-lg font-medium transition-all duration-200 border-2',
+                            'rounded border px-3 py-1.5 text-sm font-medium transition-colors',
                             !selectedType
-                                ? 'bg-white text-black border-gray-300 shadow-lg'
-                                : 'bg-gray-700 text-gray-300 border-gray-600/30 hover:bg-gray-600 hover:text-white hover:border-gray-500/50'
+                                ? 'border-black bg-black text-white'
+                                : 'border-black/40 bg-white text-black hover:bg-black hover:text-white'
                         ]"
                     >
                         Wszystkie
@@ -28,10 +27,10 @@
                         :key="type.id"
                         @click="selectedType = type.id"
                         :class="[
-                            'px-4 py-2 rounded-lg font-medium transition-all duration-200 border-2',
+                            'rounded border px-3 py-1.5 text-sm font-medium transition-colors',
                             selectedType === type.id
-                                ? 'bg-white text-black border-gray-300 shadow-lg'
-                                : 'bg-gray-700 text-gray-300 border-gray-600/30 hover:bg-gray-600 hover:text-white hover:border-gray-500/50'
+                                ? 'border-black bg-black text-white'
+                                : 'border-black/40 bg-white text-black hover:bg-black hover:text-white'
                         ]"
                     >
                         {{ type.name }}
@@ -39,20 +38,18 @@
                 </div>
             </div>
 
-            <div v-if="selectedType" class="mt-4 pt-4 border-t border-gray-600/30">
-                <div class="flex items-center text-sm text-gray-300">
+            <div v-if="selectedType" class="mt-4 border-t border-black/20 pt-4">
+                <div class="flex items-center text-sm text-black/70">
                     <span>Aktywny filtr:</span>
-                    <span
-                        class="ml-2 px-2 py-1 bg-gray-600/20 text-gray-400 rounded text-xs font-medium border border-gray-500/30">
+                    <span class="ml-2 rounded border border-black/30 px-2 py-1 text-xs font-medium text-black">
                         {{ getSelectedTypeName() }}
                     </span>
                     <button
                         @click="selectedType = null"
-                        class="ml-2 text-gray-400 hover:text-white transition-colors"
+                        class="ml-2 text-black/60 transition-colors hover:text-black"
                     >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M6 18L18 6M6 6l12 12"/>
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
                 </div>

@@ -1,96 +1,63 @@
 <template>
-    <div class="min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-950">
-        <!-- Header -->
-        <div class="relative overflow-hidden bg-gradient-to-br from-gray-900 to-black">
-            <div class="absolute inset-0 opacity-20">
-                <div class="absolute inset-0 bg-gradient-to-br from-gray-800/30 to-gray-900/20"></div>
-            </div>
+    <div class="min-h-screen bg-white text-black">
+        <SimpleNavbar :cart="cart" />
 
-            <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <Link :href="route('guns.index')"
-                              class="inline-flex items-center text-gray-400 hover:text-white mb-4 transition-colors">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                            </svg>
-                            Powrót do oferty broni
-                        </Link>
+        <div class="border-b border-black/20 bg-white py-8">
+            <div class="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 sm:px-6 lg:px-8 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <Link :href="route('guns.index')" class="inline-flex items-center text-sm text-black/70 hover:text-black">
+                        <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        Powrót do oferty
+                    </Link>
+                    <h1 class="mt-2 inline-flex items-center gap-2 text-3xl font-semibold">
+                        <span class="inline-block h-2 w-2 rounded-full bg-amber-300" />
+                        Koszyk zamówień
+                    </h1>
+                    <p class="mt-1 text-sm text-black/60">Proste podsumowanie Twojego zamówienia.</p>
+                </div>
 
-                        <h1 class="text-4xl sm:text-6xl font-bold text-white">
-                            <span
-                                class="bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent drop-shadow-lg">
-                                KOSZYK ZAMÓWIEŃ
-                            </span>
-                        </h1>
-
-                        <p class="text-gray-300 mt-2">
-                            Zarządzaj swoimi strzałami na strzelnicy
-                        </p>
-                    </div>
-
-                    <div class="text-right">
-                        <div class="text-gray-400 text-sm mb-2">Razem strzałów: {{ totalShots }}</div>
-                        <div class="text-gray-400 font-bold text-lg">{{ formatPrice(totalPrice) }} zł</div>
-                    </div>
+                <div class="rounded border border-black px-4 py-3 text-sm">
+                    <div>Razem strzałów: <strong>{{ totalShots }}</strong></div>
+                    <div>Do zapłaty: <strong>{{ formatPrice(totalPrice) }} zł</strong></div>
                 </div>
             </div>
         </div>
 
-        <!-- Club Member Toggle -->
-        <div class="relative py-8">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="bg-gray-800/80 backdrop-blur-sm rounded-xl p-6 border-2 border-gray-600/30">
-                    <div class="flex items-center justify-between">
+        <div class="py-8">
+            <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="mb-6 rounded border border-black/30 bg-white p-4">
+                    <div class="flex items-center justify-between gap-4">
                         <div>
-                            <h3 class="text-white font-bold text-lg">Członek Klubu Sagittarius</h3>
-                            <p class="text-gray-400 text-sm mt-1">Zniżki na amunicję dla członków klubu</p>
+                            <h3 class="font-medium">Członek Klubu Sagittarius</h3>
+                            <p class="text-sm text-black/60">Przełącz cenę klubową dla amunicji.</p>
                         </div>
-                        <label class="relative inline-flex items-center cursor-pointer">
+                        <label class="relative inline-flex cursor-pointer items-center">
                             <input
                                 type="checkbox"
                                 :checked="isClubMember"
                                 @change="toggleClubMember"
-                                class="sr-only peer"
+                                class="peer sr-only"
                             >
-                            <div
-                                class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gray-500/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-600"></div>
-                            <span class="ml-3 text-sm font-medium text-gray-300">
-                                {{ isClubMember ? 'TAK' : 'NIE' }}
-                            </span>
+                            <div class="h-6 w-11 rounded-full border border-black bg-white peer-checked:bg-black peer-checked:after:translate-x-full after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-black after:bg-white after:transition-all"></div>
+                            <span class="ml-3 text-xs font-semibold tracking-wide">{{ isClubMember ? 'TAK' : 'NIE' }}</span>
                         </label>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Cart Items -->
-        <div class="relative pb-16">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div v-if="cartItems.length === 0" class="text-center py-16">
-                    <div
-                        class="w-24 h-24 mx-auto mb-6 bg-gray-800 rounded-full flex items-center justify-center border-2 border-gray-600/30">
-                        <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2 8h12l-2-8M7 13v8a2 2 0 002 2h6a2 2 0 002-2v-3"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-2xl font-semibold text-white mb-2">Koszyk jest pusty</h3>
-                    <p class="text-gray-400 mb-8">Dodaj broń do koszyka, żeby zacząć rezerwację strzałów</p>
+                <div v-if="cartItems.length === 0" class="rounded border border-black/30 bg-white px-6 py-12 text-center">
+                    <h3 class="text-xl font-semibold">Koszyk jest pusty</h3>
+                    <p class="mt-2 text-sm text-black/60">Dodaj broń, aby rozpocząć zamówienie.</p>
                     <Link
                         :href="route('guns.index')"
-                        class="inline-flex items-center px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-lg transition-colors border-2 border-gray-500"
+                        class="mt-6 inline-flex items-center rounded border border-black bg-black px-5 py-2 text-sm font-medium text-white hover:bg-white hover:text-black"
                     >
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                        </svg>
-                        Przejdź do oferty broni
+                        Przejdź do oferty
                     </Link>
                 </div>
 
-                <div v-else class="space-y-6">
+                <div v-else class="space-y-5">
                     <CartItem
                         v-for="item in cartItems"
                         :key="item.gun.id"
@@ -102,31 +69,28 @@
                         @remove="removeItem"
                     />
 
-                    <!-- Summary -->
-                    <div class="bg-gray-800/80 backdrop-blur-sm rounded-xl p-6 border-2 border-gray-600/30">
-                        <div class="flex items-center justify-between">
+                    <div class="rounded border border-black bg-white p-6">
+                        <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                             <div>
-                                <h3 class="text-white font-bold text-xl">Podsumowanie zamówienia</h3>
-                                <p class="text-gray-400 text-sm mt-1">Razem: {{ totalShots }} strzałów</p>
+                                <h3 class="text-lg font-semibold">Podsumowanie</h3>
+                                <p class="text-sm text-black/60">Razem: {{ totalShots }} strzałów</p>
                             </div>
-                            <div class="text-right">
-                                <div class="text-3xl font-bold text-gray-400">{{ formatPrice(totalPrice) }} zł</div>
-                                <p class="text-gray-400 text-sm mt-1">
-                                    {{ isClubMember ? 'Cena klubowa' : 'Cena standardowa' }}
-                                </p>
+                            <div class="text-left sm:text-right">
+                                <div class="text-2xl font-semibold">{{ formatPrice(totalPrice) }} zł</div>
+                                <p class="text-xs text-black/60">{{ isClubMember ? 'Cena klubowa' : 'Cena standardowa' }}</p>
                             </div>
                         </div>
 
-                        <div class="flex gap-4 mt-6">
+                        <div class="mt-5 flex flex-col gap-3 sm:flex-row">
                             <button
                                 @click="clearCart"
-                                class="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors border border-gray-500"
+                                class="rounded border border-black px-5 py-2 text-sm font-medium hover:bg-black hover:text-white"
                             >
                                 Wyczyść koszyk
                             </button>
                             <Link
                                 :href="route('checkout.index')"
-                                class="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-lg transition-colors border-2 border-gray-500 flex-1 text-center"
+                                class="rounded border border-black bg-black px-5 py-2 text-center text-sm font-medium text-white hover:bg-white hover:text-black"
                             >
                                 Złóż zamówienie
                             </Link>
@@ -136,50 +100,56 @@
             </div>
         </div>
 
-        <Footer/>
+        <Footer />
     </div>
 </template>
 
 <script setup>
-import {ref, computed} from 'vue';
-import {Link, router} from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
+import { Link, router } from '@inertiajs/vue3';
 import Footer from '../../Components/Common/Footer.vue';
+import SimpleNavbar from '../../Components/Common/SimpleNavbar.vue';
 import CartItem from '../../Components/Cart/CartItem.vue';
 
 const props = defineProps({
     cart: {
         type: Object,
-        default: () => ({})
+        default: () => ({}),
     },
     guns: {
         type: Array,
-        default: () => []
+        default: () => [],
     },
     isClubMember: {
         type: Boolean,
-        default: false
-    }
+        default: false,
+    },
 });
 
 const isClubMember = ref(props.isClubMember);
 
 const cartItems = computed(() => {
-    return Object.entries(props.cart).map(([gunId, cartItem]) => {
-        const gun = props.guns.find(g => g.id == gunId);
-        if (!gun) return null;
+    return Object.entries(props.cart)
+        .map(([gunId, cartItem]) => {
+            const gun = props.guns.find((g) => g.id == gunId);
+            if (!gun) {
+                return null;
+            }
 
-        // Get all ammunitions with their quantities
-        const ammunitionItems = Object.entries(cartItem.ammunitions || {}).map(([ammoId, quantity]) => {
-            const ammo = gun.caliber?.ammunitions?.find(a => a.id == ammoId);
-            return ammo ? {ammunition: ammo, quantity} : null;
-        }).filter(item => item !== null);
+            const ammunitionItems = Object.entries(cartItem.ammunitions || {})
+                .map(([ammoId, quantity]) => {
+                    const ammo = gun.caliber?.ammunitions?.find((a) => a.id == ammoId);
+                    return ammo ? { ammunition: ammo, quantity } : null;
+                })
+                .filter((item) => item !== null);
 
-        return {
-            gun,
-            cartItem,
-            ammunitionItems
-        };
-    }).filter(item => item !== null);
+            return {
+                gun,
+                cartItem,
+                ammunitionItems,
+            };
+        })
+        .filter((item) => item !== null);
 });
 
 const totalShots = computed(() => {
@@ -191,78 +161,104 @@ const totalShots = computed(() => {
 const totalPrice = computed(() => {
     return cartItems.value.reduce((total, item) => {
         return total + item.ammunitionItems.reduce((itemTotal, ammoItem) => {
-            const pricePerShot = isClubMember.value
-                ? ammoItem.ammunition.club_price
-                : ammoItem.ammunition.standard_price;
-            return itemTotal + (pricePerShot * ammoItem.quantity);
+            const pricePerShot = isClubMember.value ? ammoItem.ammunition.club_price : ammoItem.ammunition.standard_price;
+            return itemTotal + pricePerShot * ammoItem.quantity;
         }, 0);
     }, 0);
 });
 
 function formatPrice(price) {
-    if (price === null || price === undefined) return '0.00';
+    if (price === null || price === undefined) {
+        return '0.00';
+    }
 
     const numericPrice = typeof price === 'string' ? parseFloat(price) : price;
 
-    if (isNaN(numericPrice)) return '0.00';
+    if (isNaN(numericPrice)) {
+        return '0.00';
+    }
 
     return numericPrice.toFixed(2);
 }
 
 function updateQuantity(gunId, ammoId, action) {
-    router.post(route('cart.update'), {
-        gun_id: gunId,
-        action: action,
-        ammo_id: ammoId
-    }, {
-        preserveScroll: true
-    });
+    router.post(
+        route('cart.update'),
+        {
+            gun_id: gunId,
+            action,
+            ammo_id: ammoId,
+        },
+        {
+            preserveScroll: true,
+        }
+    );
 }
 
 function addAmmunition(gunId, ammoId, quantity) {
-    router.post(route('cart.update'), {
-        gun_id: gunId,
-        action: 'add_ammo',
-        ammo_id: ammoId,
-        quantity: quantity
-    }, {
-        preserveScroll: true
-    });
+    router.post(
+        route('cart.update'),
+        {
+            gun_id: gunId,
+            action: 'add_ammo',
+            ammo_id: ammoId,
+            quantity,
+        },
+        {
+            preserveScroll: true,
+        }
+    );
 }
 
 function removeAmmunition(gunId, ammoId) {
-    router.post(route('cart.update'), {
-        gun_id: gunId,
-        action: 'remove_ammo',
-        ammo_id: ammoId
-    }, {
-        preserveScroll: true
-    });
+    router.post(
+        route('cart.update'),
+        {
+            gun_id: gunId,
+            action: 'remove_ammo',
+            ammo_id: ammoId,
+        },
+        {
+            preserveScroll: true,
+        }
+    );
 }
 
 function removeItem(gunId) {
-    router.post(route('cart.update'), {
-        gun_id: gunId,
-        action: 'remove'
-    }, {
-        preserveScroll: true
-    });
+    router.post(
+        route('cart.update'),
+        {
+            gun_id: gunId,
+            action: 'remove',
+        },
+        {
+            preserveScroll: true,
+        }
+    );
 }
 
 function toggleClubMember() {
     isClubMember.value = !isClubMember.value;
-    router.post(route('cart.toggle-club-member'), {
-        is_club_member: isClubMember.value
-    }, {
-        preserveScroll: true
-    });
+    router.post(
+        route('cart.toggle-club-member'),
+        {
+            is_club_member: isClubMember.value,
+        },
+        {
+            preserveScroll: true,
+        }
+    );
 }
 
 function clearCart() {
     if (confirm('Czy na pewno chcesz wyczyścić cały koszyk?')) {
-        router.post(route('cart.clear'), {}, {
-            preserveScroll: true
-        });
+        router.post(
+            route('cart.clear'),
+            {},
+            {
+                preserveScroll: true,
+            }
+        );
     }
 }
 </script>

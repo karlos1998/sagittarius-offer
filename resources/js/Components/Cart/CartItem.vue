@@ -1,20 +1,19 @@
 <template>
-    <div class="bg-gray-800/80 backdrop-blur-sm rounded-xl overflow-hidden border-2 border-gray-600/30">
+    <div class="overflow-hidden rounded border border-black/30 bg-white">
         <!-- Header -->
-        <div class="bg-gradient-to-r from-gray-700/20 to-gray-800/20 p-4 border-b border-gray-600/30">
+        <div class="border-b border-black/20 bg-white p-4">
             <div class="flex items-center justify-between">
                 <div>
-                    <h3 class="text-white font-bold text-lg">{{ item.gun.name }}</h3>
-                    <p class="text-gray-300 text-sm">{{ item.gun.gun_type?.name }} • {{ item.gun.caliber?.name }}</p>
+                    <h3 class="text-lg font-semibold">{{ item.gun.name }}</h3>
+                    <p class="text-sm text-black/60">{{ item.gun.gun_type?.name }} • {{ item.gun.caliber?.name }}</p>
                 </div>
                 <button
                     @click="removeItem"
-                    class="text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-700/50 rounded-lg"
+                    class="rounded p-2 text-black/50 transition-colors hover:bg-black hover:text-white"
                     title="Usuń całą broń z koszyka"
                 >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
                 </button>
             </div>
@@ -27,26 +26,25 @@
                 <div
                     v-for="ammoItem in item.ammunitionItems"
                     :key="ammoItem.ammunition.id"
-                    class="bg-gray-700/50 rounded-lg p-4 border border-gray-600/20"
+                    class="rounded border border-black/20 p-4"
                 >
                     <div class="flex items-center justify-between mb-3">
                         <div>
-                            <h4 class="text-white font-medium">{{ ammoItem.ammunition.name }}</h4>
-                            <p class="text-gray-300 text-sm">
+                            <h4 class="font-medium">{{ ammoItem.ammunition.name }}</h4>
+                            <p class="text-sm text-black/70">
                                 Cena: {{
                                     formatPrice(isClubMember ? ammoItem.ammunition.club_price : ammoItem.ammunition.standard_price)
                                 }} zł/szt
-                                <span class="text-gray-400">({{ isClubMember ? 'klub' : 'standard' }})</span>
+                                <span class="text-black/50">({{ isClubMember ? 'klub' : 'standard' }})</span>
                             </p>
                         </div>
                         <button
                             @click="removeAmmo(ammoItem.ammunition.id)"
-                            class="text-gray-400 hover:text-white transition-colors p-1 hover:bg-gray-700/50 rounded"
+                            class="rounded p-1 text-black/50 transition-colors hover:bg-black hover:text-white"
                             title="Usuń tę amunicję"
                         >
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M6 18L18 6M6 6l12 12"/>
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
                     </div>
@@ -57,32 +55,31 @@
                             <button
                                 @click="updateQuantity(ammoItem.ammunition.id, 'decrease')"
                                 :disabled="ammoItem.quantity <= 5"
-                                class="w-8 h-8 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-600 text-white rounded flex items-center justify-center transition-colors border border-gray-500 disabled:border-gray-500"
+                                class="flex h-8 w-8 items-center justify-center rounded border border-black bg-white text-black transition-colors hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:border-black/30 disabled:text-black/30"
                             >
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
                                 </svg>
                             </button>
 
-                            <span class="text-white font-bold text-lg min-w-[2rem] text-center">
+                            <span class="min-w-[2rem] text-center text-lg font-semibold">
                                 {{ ammoItem.quantity }}
                             </span>
 
                             <button
                                 @click="updateQuantity(ammoItem.ammunition.id, 'increase')"
-                                class="w-8 h-8 bg-gray-600 hover:bg-gray-700 text-white rounded flex items-center justify-center transition-colors border border-gray-500"
+                                class="flex h-8 w-8 items-center justify-center rounded border border-black bg-white text-black transition-colors hover:bg-black hover:text-white"
                             >
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                 </svg>
                             </button>
 
-                            <span class="text-gray-300 text-sm ml-2">strzałów</span>
+                            <span class="ml-2 text-sm text-black/60">strzałów</span>
                         </div>
 
                         <div class="text-right">
-                            <div class="text-gray-400 font-bold">
+                            <div class="font-semibold">
                                 {{ formatPrice(ammoTotal(ammoItem)) }} zł
                             </div>
                         </div>
@@ -91,14 +88,14 @@
             </div>
 
             <!-- Add More Ammunition Button -->
-            <div v-if="availableAmmunitions.length > 0" class="mt-6 pt-4 border-t border-gray-600/30">
-                <label class="block text-gray-300 font-medium mb-2">Dodaj więcej amunicji:</label>
+            <div v-if="availableAmmunitions.length > 0" class="mt-6 border-t border-black/20 pt-4">
+                <label class="mb-2 block font-medium">Dodaj więcej amunicji:</label>
                 <div class="flex flex-wrap gap-2">
                     <button
                         v-for="ammo in availableAmmunitions"
                         :key="ammo.id"
                         @click="addAmmunition(ammo.id)"
-                        class="px-3 py-2 bg-gray-600/20 hover:bg-gray-600/40 text-gray-300 hover:text-white rounded border border-gray-600/30 hover:border-gray-500/50 transition-colors text-sm"
+                        class="rounded border border-black/40 px-3 py-2 text-sm transition-colors hover:bg-black hover:text-white"
                     >
                         + {{ ammo.name }}
                     </button>

@@ -1,37 +1,42 @@
 <template>
-    <div class="min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-950">
-        <div class="relative overflow-hidden bg-gradient-to-br from-gray-900 to-black">
-            <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-                <Link :href="route('cart.index')" class="inline-flex items-center text-gray-400 hover:text-white mb-4 transition-colors">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+    <div class="min-h-screen bg-white text-black">
+        <SimpleNavbar :cart="cart" />
+
+        <div class="border-b border-black/20 bg-white py-8">
+            <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+                <Link :href="route('cart.index')" class="inline-flex items-center text-sm text-black/70 hover:text-black">
+                    <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
                     Powrót do koszyka
                 </Link>
 
-                <h1 class="text-4xl sm:text-5xl font-bold text-white">Finalizacja zamówienia</h1>
-                <p class="text-gray-300 mt-2">Krok {{ stepLabel }}</p>
+                <h1 class="mt-2 inline-flex items-center gap-2 text-3xl font-semibold">
+                    <span class="inline-block h-2 w-2 rounded-full bg-amber-300" />
+                    Finalizacja zamówienia
+                </h1>
+                <p class="mt-1 text-sm text-black/60">Krok {{ stepLabel }}</p>
             </div>
         </div>
 
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div v-if="$page.props.flash?.success" class="mb-6 bg-green-500/15 border border-green-500/40 text-green-200 px-4 py-3 rounded-lg">
+        <div class="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+            <div v-if="$page.props.flash?.success" class="mb-6 rounded border border-black bg-black px-4 py-3 text-sm text-white">
                 {{ $page.props.flash.success }}
             </div>
 
-            <div v-if="$page.props.flash?.error" class="mb-6 bg-red-500/15 border border-red-500/40 text-red-200 px-4 py-3 rounded-lg">
+            <div v-if="$page.props.flash?.error" class="mb-6 rounded border border-black px-4 py-3 text-sm text-black">
                 {{ $page.props.flash.error }}
             </div>
 
-            <div class="grid lg:grid-cols-2 gap-8">
-                <div class="bg-gray-800/80 border border-gray-700 rounded-xl p-6">
-                    <h2 class="text-xl font-semibold text-white mb-4">Podsumowanie</h2>
+            <div class="grid gap-6 lg:grid-cols-2">
+                <div class="rounded border border-black/30 bg-white p-6">
+                    <h2 class="mb-4 text-xl font-semibold">Podsumowanie</h2>
 
                     <template v-if="checkoutStep !== 'complete'">
                         <div class="space-y-4">
-                            <div v-for="(item, index) in cartItems" :key="index" class="border border-gray-700 rounded-lg p-4">
-                                <div class="text-white font-medium">{{ item.gun.name }}</div>
-                                <ul class="mt-2 space-y-1 text-sm text-gray-300">
+                            <div v-for="(item, index) in cartItems" :key="index" class="rounded border border-black/20 p-4">
+                                <div class="font-medium">{{ item.gun.name }}</div>
+                                <ul class="mt-2 space-y-1 text-sm text-black/70">
                                     <li v-for="ammo in item.ammunitionItems" :key="ammo.ammunition.id" class="flex justify-between gap-4">
                                         <span>{{ ammo.ammunition.name }} ({{ ammo.quantity }} strzałów)</span>
                                         <span>{{ formatPrice(ammo.total) }} zł</span>
@@ -42,111 +47,111 @@
                     </template>
 
                     <template v-else-if="order">
-                        <div class="space-y-3 text-sm text-gray-300">
+                        <div class="space-y-3 text-sm text-black/70">
                             <div class="flex justify-between gap-4">
                                 <span>Numer zamówienia</span>
-                                <span class="text-white font-semibold">{{ order.order_number }}</span>
+                                <span class="font-semibold text-black">{{ order.order_number }}</span>
                             </div>
                             <div class="flex justify-between gap-4">
                                 <span>E-mail</span>
-                                <span class="text-white">{{ order.email }}</span>
+                                <span class="text-black">{{ order.email }}</span>
                             </div>
                             <div class="flex justify-between gap-4">
                                 <span>Adres</span>
-                                <span class="text-white text-right">{{ order.full_address }}</span>
+                                <span class="text-right text-black">{{ order.full_address }}</span>
                             </div>
                             <div class="flex justify-between gap-4">
                                 <span>Forma płatności</span>
-                                <span class="text-white">{{ order.payment_method_label }}</span>
+                                <span class="text-black">{{ order.payment_method_label }}</span>
                             </div>
                             <div class="flex justify-between gap-4">
                                 <span>Status płatności</span>
-                                <span class="text-white">{{ order.payment_status_label }}</span>
+                                <span class="text-black">{{ order.payment_status_label }}</span>
                             </div>
                         </div>
                     </template>
 
-                    <div class="mt-6 border-t border-gray-700 pt-4 space-y-2 text-gray-300">
+                    <div class="mt-6 space-y-2 border-t border-black/20 pt-4 text-sm">
                         <div class="flex justify-between gap-4">
                             <span>Łącznie strzałów</span>
-                            <span class="text-white font-medium">{{ totalShots }}</span>
+                            <span class="font-medium">{{ totalShots }}</span>
                         </div>
                         <div class="flex justify-between gap-4 text-lg">
                             <span>Do zapłaty</span>
-                            <span class="text-white font-bold">{{ formatPrice(totalPrice) }} zł</span>
+                            <span class="font-semibold">{{ formatPrice(totalPrice) }} zł</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-gray-800/80 border border-gray-700 rounded-xl p-6">
+                <div class="rounded border border-black/30 bg-white p-6">
                     <template v-if="checkoutStep === 'details'">
-                        <h2 class="text-xl font-semibold text-white mb-4">Dane zamawiającego</h2>
+                        <h2 class="mb-4 text-xl font-semibold">Dane zamawiającego</h2>
 
                         <form @submit.prevent="submitOrder" class="space-y-4">
                             <div>
-                                <label class="block text-sm text-gray-300 mb-1">Imię</label>
-                                <input v-model="detailsForm.first_name" type="text" class="w-full rounded-lg bg-gray-900 border border-gray-700 text-white focus:border-gray-500 focus:ring-gray-500"/>
-                                <InputError :message="detailsForm.errors.first_name" class="mt-2"/>
+                                <label class="mb-1 block text-sm">Imię</label>
+                                <input v-model="detailsForm.first_name" type="text" class="w-full rounded border border-black/30 px-3 py-2 text-sm focus:border-black focus:outline-none" />
+                                <InputError :message="detailsForm.errors.first_name" class="mt-2" />
                             </div>
 
                             <div>
-                                <label class="block text-sm text-gray-300 mb-1">Nazwisko</label>
-                                <input v-model="detailsForm.last_name" type="text" class="w-full rounded-lg bg-gray-900 border border-gray-700 text-white focus:border-gray-500 focus:ring-gray-500"/>
-                                <InputError :message="detailsForm.errors.last_name" class="mt-2"/>
+                                <label class="mb-1 block text-sm">Nazwisko</label>
+                                <input v-model="detailsForm.last_name" type="text" class="w-full rounded border border-black/30 px-3 py-2 text-sm focus:border-black focus:outline-none" />
+                                <InputError :message="detailsForm.errors.last_name" class="mt-2" />
                             </div>
 
                             <div>
-                                <label class="block text-sm text-gray-300 mb-1">Ulica</label>
-                                <input v-model="detailsForm.street" type="text" class="w-full rounded-lg bg-gray-900 border border-gray-700 text-white focus:border-gray-500 focus:ring-gray-500"/>
-                                <InputError :message="detailsForm.errors.street" class="mt-2"/>
+                                <label class="mb-1 block text-sm">Ulica</label>
+                                <input v-model="detailsForm.street" type="text" class="w-full rounded border border-black/30 px-3 py-2 text-sm focus:border-black focus:outline-none" />
+                                <InputError :message="detailsForm.errors.street" class="mt-2" />
                             </div>
 
-                            <div class="grid sm:grid-cols-2 gap-4">
+                            <div class="grid gap-4 sm:grid-cols-2">
                                 <div>
-                                    <label class="block text-sm text-gray-300 mb-1">Numer domu</label>
-                                    <input v-model="detailsForm.house_number" type="text" class="w-full rounded-lg bg-gray-900 border border-gray-700 text-white focus:border-gray-500 focus:ring-gray-500"/>
-                                    <InputError :message="detailsForm.errors.house_number" class="mt-2"/>
+                                    <label class="mb-1 block text-sm">Numer domu</label>
+                                    <input v-model="detailsForm.house_number" type="text" class="w-full rounded border border-black/30 px-3 py-2 text-sm focus:border-black focus:outline-none" />
+                                    <InputError :message="detailsForm.errors.house_number" class="mt-2" />
                                 </div>
                                 <div>
-                                    <label class="block text-sm text-gray-300 mb-1">Numer mieszkania (opcjonalnie)</label>
-                                    <input v-model="detailsForm.apartment_number" type="text" class="w-full rounded-lg bg-gray-900 border border-gray-700 text-white focus:border-gray-500 focus:ring-gray-500"/>
-                                    <InputError :message="detailsForm.errors.apartment_number" class="mt-2"/>
-                                </div>
-                            </div>
-
-                            <div class="grid sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm text-gray-300 mb-1">Kod pocztowy</label>
-                                    <input v-model="detailsForm.postal_code" type="text" placeholder="00-000" class="w-full rounded-lg bg-gray-900 border border-gray-700 text-white focus:border-gray-500 focus:ring-gray-500"/>
-                                    <InputError :message="detailsForm.errors.postal_code" class="mt-2"/>
-                                </div>
-                                <div>
-                                    <label class="block text-sm text-gray-300 mb-1">Miasto</label>
-                                    <input v-model="detailsForm.city" type="text" class="w-full rounded-lg bg-gray-900 border border-gray-700 text-white focus:border-gray-500 focus:ring-gray-500"/>
-                                    <InputError :message="detailsForm.errors.city" class="mt-2"/>
+                                    <label class="mb-1 block text-sm">Numer mieszkania (opcjonalnie)</label>
+                                    <input v-model="detailsForm.apartment_number" type="text" class="w-full rounded border border-black/30 px-3 py-2 text-sm focus:border-black focus:outline-none" />
+                                    <InputError :message="detailsForm.errors.apartment_number" class="mt-2" />
                                 </div>
                             </div>
 
-                            <div>
-                                <label class="block text-sm text-gray-300 mb-1">E-mail</label>
-                                <input v-model="detailsForm.email" type="email" class="w-full rounded-lg bg-gray-900 border border-gray-700 text-white focus:border-gray-500 focus:ring-gray-500"/>
-                                <InputError :message="detailsForm.errors.email" class="mt-2"/>
+                            <div class="grid gap-4 sm:grid-cols-2">
+                                <div>
+                                    <label class="mb-1 block text-sm">Kod pocztowy</label>
+                                    <input v-model="detailsForm.postal_code" type="text" placeholder="00-000" class="w-full rounded border border-black/30 px-3 py-2 text-sm focus:border-black focus:outline-none" />
+                                    <InputError :message="detailsForm.errors.postal_code" class="mt-2" />
+                                </div>
+                                <div>
+                                    <label class="mb-1 block text-sm">Miasto</label>
+                                    <input v-model="detailsForm.city" type="text" class="w-full rounded border border-black/30 px-3 py-2 text-sm focus:border-black focus:outline-none" />
+                                    <InputError :message="detailsForm.errors.city" class="mt-2" />
+                                </div>
                             </div>
 
                             <div>
-                                <label class="block text-sm text-gray-300 mb-1">Forma płatności</label>
-                                <select v-model="detailsForm.payment_method" class="w-full rounded-lg bg-gray-900 border border-gray-700 text-white focus:border-gray-500 focus:ring-gray-500">
+                                <label class="mb-1 block text-sm">E-mail</label>
+                                <input v-model="detailsForm.email" type="email" class="w-full rounded border border-black/30 px-3 py-2 text-sm focus:border-black focus:outline-none" />
+                                <InputError :message="detailsForm.errors.email" class="mt-2" />
+                            </div>
+
+                            <div>
+                                <label class="mb-1 block text-sm">Forma płatności</label>
+                                <select v-model="detailsForm.payment_method" class="w-full rounded border border-black/30 px-3 py-2 text-sm focus:border-black focus:outline-none">
                                     <option v-for="method in paymentMethods" :key="method.value" :value="method.value">
                                         {{ method.label }}
                                     </option>
                                 </select>
-                                <InputError :message="detailsForm.errors.payment_method" class="mt-2"/>
+                                <InputError :message="detailsForm.errors.payment_method" class="mt-2" />
                             </div>
 
                             <button
                                 type="submit"
                                 :disabled="detailsForm.processing"
-                                class="w-full px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg border border-gray-500 disabled:opacity-60"
+                                class="w-full rounded border border-black bg-black px-5 py-2 text-sm font-medium text-white hover:bg-white hover:text-black disabled:opacity-60"
                             >
                                 {{ detailsForm.processing ? 'Zapisywanie...' : 'Zapisz i wyślij kod' }}
                             </button>
@@ -154,30 +159,30 @@
                     </template>
 
                     <template v-else-if="checkoutStep === 'verify' && order">
-                        <h2 class="text-xl font-semibold text-white mb-4">Weryfikacja e-mail</h2>
-                        <p class="text-gray-300 mb-1">Kod został wysłany na: <strong>{{ order.email }}</strong></p>
-                        <p v-if="order.verification_code_expires_at" class="text-gray-400 text-sm mb-4">
+                        <h2 class="mb-4 text-xl font-semibold">Weryfikacja e-mail</h2>
+                        <p class="mb-1 text-sm">Kod został wysłany na: <strong>{{ order.email }}</strong></p>
+                        <p v-if="order.verification_code_expires_at" class="mb-4 text-xs text-black/60">
                             Kod jest ważny {{ order.verification_code_valid_for_minutes }} minut. Ważny do: {{ formatDate(order.verification_code_expires_at) }}
                         </p>
 
                         <form @submit.prevent="verifyCode" class="space-y-4">
                             <div>
-                                <label class="block text-sm text-gray-300 mb-1">Kod weryfikacyjny</label>
+                                <label class="mb-1 block text-sm">Kod weryfikacyjny</label>
                                 <input
                                     v-model="verifyForm.code"
                                     type="text"
                                     inputmode="numeric"
                                     maxlength="6"
-                                    class="w-full rounded-lg bg-gray-900 border border-gray-700 text-white tracking-[0.4em] text-center text-xl focus:border-gray-500 focus:ring-gray-500"
+                                    class="w-full rounded border border-black/30 px-3 py-2 text-center text-xl tracking-[0.35em] focus:border-black focus:outline-none"
                                     placeholder="000000"
                                 />
-                                <InputError :message="verifyForm.errors.code" class="mt-2"/>
+                                <InputError :message="verifyForm.errors.code" class="mt-2" />
                             </div>
 
                             <button
                                 type="submit"
                                 :disabled="verifyForm.processing"
-                                class="w-full px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg border border-gray-500 disabled:opacity-60"
+                                class="w-full rounded border border-black bg-black px-5 py-2 text-sm font-medium text-white hover:bg-white hover:text-black disabled:opacity-60"
                             >
                                 {{ verifyForm.processing ? 'Weryfikacja...' : 'Przejdź dalej' }}
                             </button>
@@ -188,22 +193,22 @@
                             type="button"
                             :disabled="resendForm.processing"
                             @click="resendCode"
-                            class="mt-3 w-full px-6 py-3 bg-gray-900 hover:bg-gray-950 text-white font-semibold rounded-lg border border-gray-600 disabled:opacity-60"
+                            class="mt-3 w-full rounded border border-black px-5 py-2 text-sm font-medium hover:bg-black hover:text-white disabled:opacity-60"
                         >
                             {{ resendForm.processing ? 'Wysyłanie nowego kodu...' : 'Wyślij nowy kod' }}
                         </button>
                     </template>
 
                     <template v-else-if="checkoutStep === 'complete' && order">
-                        <h2 class="text-xl font-semibold text-white mb-4">Zamówienie gotowe</h2>
-                        <p class="text-gray-300 mb-6">
+                        <h2 class="mb-4 text-xl font-semibold">Zamówienie gotowe</h2>
+                        <p class="mb-6 text-sm text-black/70">
                             Zamówienie zostało potwierdzone. Wysłaliśmy PDF na adres e-mail i możesz pobrać go również tutaj.
                         </p>
 
                         <a
                             v-if="order.download_url"
                             :href="order.download_url"
-                            class="inline-flex w-full justify-center px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg border border-gray-500"
+                            class="inline-flex w-full justify-center rounded border border-black bg-black px-5 py-2 text-sm font-medium text-white hover:bg-white hover:text-black"
                         >
                             Pobierz PDF zamówienia
                         </a>
@@ -218,6 +223,7 @@
 import { computed, onUnmounted, ref } from 'vue';
 import { Link, useForm } from '@inertiajs/vue3';
 import InputError from '@/Components/InputError.vue';
+import SimpleNavbar from '@/Components/Common/SimpleNavbar.vue';
 
 const props = defineProps({
     cart: {

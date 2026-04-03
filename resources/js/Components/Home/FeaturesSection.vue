@@ -1,7 +1,10 @@
 <template>
-  <div class="relative py-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+  <div class="py-12">
+    <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="mb-8 text-center">
+        <h2 class="text-2xl font-semibold">Dlaczego Sagittarius</h2>
+      </div>
+      <div class="grid grid-cols-1 gap-5 md:grid-cols-3">
         <FeatureCard
             v-for="(feature, index) in features"
             :key="index"
