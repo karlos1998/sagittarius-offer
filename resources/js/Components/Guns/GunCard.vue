@@ -5,7 +5,7 @@
         <div class="relative aspect-video overflow-hidden border-b border-black/20 bg-white">
             <div v-if="gun.photos && gun.photos.length > 0" class="w-full h-full">
                 <img
-                    :src="gun.photos[0]"
+                    :src="gun.photo_urls?.[0] || gun.photos[0]"
                     :alt="gun.name"
                     class="w-full h-full object-cover"
                     @error="handleImageError"

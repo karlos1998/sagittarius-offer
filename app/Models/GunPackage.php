@@ -57,6 +57,10 @@ class GunPackage extends Model
             return $this->preview_image;
         }
 
-        return Storage::disk('public')->url($this->preview_image);
+        if (! Storage::disk('public')->exists($this->preview_image) && Storage::disk('local')->exists($this->preview_image)) {
+            Storage::disk('public')->put($this->preview_image, Storage::disk('local')->get($this->preview_image));
+        }
+
+        return '/storage/'.ltrim($this->preview_image, '/');
     }
 }

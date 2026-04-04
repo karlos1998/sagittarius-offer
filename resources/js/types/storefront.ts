@@ -21,6 +21,7 @@ export interface Gun {
     name: string;
     description?: string | null;
     photos?: string[];
+    photo_urls?: string[];
     gun_type_id?: number | null;
     gun_type?: GunType | null;
     gunType?: GunType | null;
