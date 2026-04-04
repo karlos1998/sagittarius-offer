@@ -1,16 +1,14 @@
 <?php
 
-use App\Models\Gun;
+use App\Support\MediaUrlResolver;
 
 it('builds public urls for relative gun photos', function () {
-    $gun = new Gun([
-        'photos' => [
-            'guns/example.jpg',
-            'https://cdn.example.com/photo.jpg',
-        ],
-    ]);
+    $resolver = MediaUrlResolver::make();
 
-    expect($gun->photo_urls)->toBe([
+    expect($resolver->many([
+        'guns/example.jpg',
+        'https://cdn.example.com/photo.jpg',
+    ]))->toBe([
         '/storage/guns/example.jpg',
         'https://cdn.example.com/photo.jpg',
     ]);

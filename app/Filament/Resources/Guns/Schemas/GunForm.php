@@ -35,6 +35,8 @@ class GunForm
                     ->maxSize(20480) // 20MB in KB
                     ->image()
                     ->directory('guns')
+                    ->disk(config('filesystems.media_disk', 'public'))
+                    ->visibility('public')
                     ->columnSpanFull(),
             ]);
     }

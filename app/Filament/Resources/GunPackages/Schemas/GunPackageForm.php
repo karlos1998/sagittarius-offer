@@ -30,6 +30,7 @@ class GunPackageForm
                     ->label('Zdjęcie podglądowe pakietu')
                     ->image()
                     ->directory('gun-packages')
+                    ->disk(config('filesystems.media_disk', 'public'))
                     ->visibility('public')
                     ->columnSpanFull(),
                 Toggle::make('is_active')

@@ -21,7 +21,7 @@ class GunPackageInfolist
                     ->columnSpanFull(),
                 ImageEntry::make('preview_image')
                     ->label('Zdjęcie podglądowe')
-                    ->disk('public')
+                    ->disk(config('filesystems.media_disk', 'public'))
                     ->visibility('public')
                     ->height(180)
                     ->placeholder('-')
