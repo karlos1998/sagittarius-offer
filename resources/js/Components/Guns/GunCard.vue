@@ -3,11 +3,11 @@
         class="overflow-hidden rounded border border-black/30 bg-white transition-colors hover:border-black">
         <!-- Gun Image -->
         <div class="relative aspect-video overflow-hidden border-b border-black/20 bg-white">
-            <div v-if="gun.photos && gun.photos.length > 0" class="w-full h-full">
+            <div v-if="gun.photos && gun.photos.length > 0" class="flex w-full h-full items-center justify-center p-2">
                 <img
                     :src="gun.photo_urls?.[0] || gun.photos[0]"
                     :alt="gun.name"
-                    class="w-full h-full object-cover"
+                    class="max-h-full max-w-full h-auto w-auto object-contain"
                     @error="handleImageError"
                 />
             </div>
