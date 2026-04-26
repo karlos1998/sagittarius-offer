@@ -35,6 +35,11 @@ class OrderInfolist
                     ->badge()
                     ->state(fn ($record): string => $record->paymentStatusLabel())
                     ->color(fn ($record): string => $record->payment_status->value === 'paid' ? 'success' : 'danger'),
+                TextEntry::make('is_completed')
+                    ->label('Realizacja')
+                    ->badge()
+                    ->state(fn ($record): string => $record->is_completed ? 'Zrealizowane' : 'Niezrealizowane')
+                    ->color(fn ($record): string => $record->is_completed ? 'success' : 'gray'),
                 TextEntry::make('total_shots')
                     ->label('Łącznie strzałów'),
                 TextEntry::make('total_amount')
@@ -71,6 +76,10 @@ class OrderInfolist
                     ->placeholder('-'),
                 TextEntry::make('paid_at')
                     ->label('Opłacono')
+                    ->dateTime()
+                    ->placeholder('-'),
+                TextEntry::make('completed_at')
+                    ->label('Zrealizowano')
                     ->dateTime()
                     ->placeholder('-'),
             ]);

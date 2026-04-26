@@ -34,6 +34,11 @@ class OrdersTable
                     ->badge()
                     ->state(fn (Order $record): string => $record->paymentStatusLabel())
                     ->color(fn (Order $record): string => $record->payment_status->value === 'paid' ? 'success' : 'danger'),
+                TextColumn::make('is_completed')
+                    ->label('Realizacja')
+                    ->badge()
+                    ->state(fn (Order $record): string => $record->is_completed ? 'Zrealizowane' : 'Niezrealizowane')
+                    ->color(fn (Order $record): string => $record->is_completed ? 'success' : 'gray'),
                 TextColumn::make('total_amount')
                     ->label('Kwota')
                     ->money('PLN')
@@ -53,6 +58,14 @@ class OrdersTable
                     ->visible(fn (Order $record): bool => $record->canBeMarkedAsPaid())
                     ->action(function (Order $record): void {
                         $record->markAsPaid();
+                    }),
+                Action::make('mark_as_completed')
+                    ->label('Oznacz jako zrealizowane')
+                    ->color('gray')
+                    ->requiresConfirmation()
+                    ->visible(fn (Order $record): bool => $record->canBeCompleted())
+                    ->action(function (Order $record): void {
+                        $record->markAsCompleted();
                     }),
             ])
             ->toolbarActions([]);
