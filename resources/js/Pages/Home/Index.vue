@@ -2,8 +2,8 @@
     <div class="min-h-screen bg-white text-black">
         <SimpleNavbar :cart="cart" />
         <HeroSection />
-        <FeaturesSection />
         <InstructorsSection :instructors="instructors" />
+        <FeaturesSection />
         <Footer />
     </div>
 </template>
