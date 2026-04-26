@@ -31,7 +31,7 @@ beforeEach(function () {
     });
 });
 
-it('creates order and sends verification code email', function () {
+it('creates order and queues verification code email', function () {
     Mail::fake();
 
     $caliber = Caliber::factory()->create();
@@ -84,7 +84,7 @@ it('creates order and sends verification code email', function () {
 
     expect(OrderItem::query()->count())->toBe(1);
 
-    Mail::assertSent(OrderVerificationCodeMail::class, function (OrderVerificationCodeMail $mail) use ($order): bool {
+    Mail::assertQueued(OrderVerificationCodeMail::class, function (OrderVerificationCodeMail $mail) use ($order): bool {
         return $mail->hasTo($order->email)
             && $mail->order->is($order)
             && strlen($mail->verificationCode) === 6;
@@ -237,7 +237,7 @@ it('resends a different verification code and extends validity to 5 minutes', fu
     expect(Hash::check($oldCode, (string) $order->verification_code_hash))->toBeFalse();
     expect($order->verification_code_expires_at?->isAfter(now()->addMinutes(4)))->toBeTrue();
 
-    Mail::assertSent(OrderVerificationCodeMail::class, function (OrderVerificationCodeMail $mail) use ($order, $oldCode): bool {
+    Mail::assertQueued(OrderVerificationCodeMail::class, function (OrderVerificationCodeMail $mail) use ($order, $oldCode): bool {
         return $mail->hasTo($order->email)
             && $mail->order->is($order)
             && $mail->verificationCode !== $oldCode;

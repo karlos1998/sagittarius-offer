@@ -147,7 +147,7 @@ class CheckoutService
             return $order;
         });
 
-        Mail::to($order->email)->send(new OrderVerificationCodeMail($order, $verificationCode));
+        Mail::to($order->email)->queue(new OrderVerificationCodeMail($order, $verificationCode));
 
         $request->session()->put('checkout_order_id', $order->id);
 
@@ -161,7 +161,7 @@ class CheckoutService
     {
         $newVerificationCode = $this->issueNewVerificationCode($order);
 
-        Mail::to($order->email)->send(new OrderVerificationCodeMail($order, $newVerificationCode));
+        Mail::to($order->email)->queue(new OrderVerificationCodeMail($order, $newVerificationCode));
     }
 
     public function validateVerificationCode(Order $order, string $code): ?string
