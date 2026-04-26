@@ -50,15 +50,23 @@
                     <div
                         v-for="ammo in gun.caliber.ammunitions"
                         :key="ammo.id"
-                        class="flex items-center justify-between rounded border border-black/20 px-2 py-1 text-sm text-black/80"
+                        class="flex items-start justify-between gap-3 rounded border border-black/20 px-2 py-1.5 text-sm text-black/80 sm:items-center"
                     >
-                        <span class="font-medium">{{ ammo.name }}</span>
-                        <div class="flex items-center space-x-2 text-xs">
-                            <span class="font-semibold">{{ ammo.club_price }} zł</span>
-                            <span class="text-black/50">(klub)</span>
-                            <span class="text-black/30">/</span>
-                            <span>{{ ammo.standard_price }} zł</span>
-                            <span class="text-black/50">(standard)</span>
+                        <span class="min-w-0 font-medium leading-snug">{{ ammo.name }}</span>
+                        <div class="flex shrink-0 items-center gap-1 text-[11px] sm:text-xs">
+                            <span
+                                class="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 font-semibold text-emerald-700"
+                            >
+                                <span>{{ formatCurrencyPLN(ammo.club_price) }}</span>
+                                <span class="font-medium text-emerald-700/80">(klub)</span>
+                            </span>
+                            <span class="text-black/20">/</span>
+                            <span
+                                class="inline-flex items-center gap-1 rounded-full border border-black/10 bg-black/[0.04] px-2 py-0.5 text-black/70"
+                            >
+                                <span>{{ formatCurrencyPLN(ammo.standard_price) }}</span>
+                                <span class="text-black/50">(standard)</span>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -96,6 +104,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { CartMap, Gun } from '@/types/storefront';
+import { formatCurrencyPLN } from '@/utils/format';
 
 const props = withDefaults(
     defineProps<{
