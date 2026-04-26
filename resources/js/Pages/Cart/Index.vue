@@ -88,12 +88,13 @@
                             >
                                 Wyczyść koszyk
                             </button>
-                            <Link
-                                :href="route('checkout.index')"
+                            <button
+                                type="button"
+                                @click="proceedToCheckout"
                                 class="rounded border border-black bg-black px-5 py-2 text-center text-sm font-medium text-white hover:bg-white hover:text-black"
                             >
                                 Złóż zamówienie
-                            </Link>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -124,6 +125,45 @@
                         @click="confirmAction"
                     >
                         Usuń
+                    </button>
+                </div>
+            </template>
+        </ConfirmationModal>
+
+        <ConfirmationModal :show="clubMemberCheckoutModalOpen" max-width="lg" @close="closeClubMemberCheckoutModal">
+            <template #title>
+                Potwierdzenie ceny klubowej
+            </template>
+
+            <template #content>
+                <div class="space-y-3 text-left">
+                    <p>
+                        Deklarujesz się jako członek Klubu Sagittarius, dlatego cena Twojego zamówienia jest korzystniejsza.
+                    </p>
+                    <p>
+                        Jeśli zaznaczyłeś tę opcję przypadkowo, możesz przejść dalej z ceną standardową.
+                    </p>
+                    <p class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                        Jeśli kontynuujesz jako członek klubu, Twoje zamówienie zostanie przez nas zweryfikowane na miejscu.
+                    </p>
+                </div>
+            </template>
+
+            <template #footer>
+                <div class="flex w-full flex-col gap-3 sm:flex-row sm:justify-end">
+                    <button
+                        type="button"
+                        class="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-700 transition hover:border-gray-900 hover:text-gray-900 sm:w-auto"
+                        @click="continueWithStandardPrice"
+                    >
+                        Przejdź dalej z ceną standardową
+                    </button>
+                    <button
+                        type="button"
+                        class="w-full rounded-xl border border-black bg-black px-4 py-3 text-sm font-semibold text-white transition hover:bg-gray-900 sm:w-auto"
+                        @click="continueWithClubPrice"
+                    >
+                        Kontynuuj jako członek klubu
                     </button>
                 </div>
             </template>
@@ -172,6 +212,7 @@ const props = withDefaults(
 );
 
 const isClubMember = ref(props.isClubMember);
+const clubMemberCheckoutModalOpen = ref(false);
 const confirmation = ref<ConfirmationState>({
     show: false,
     title: '',
@@ -273,6 +314,42 @@ function toggleClubMember(): void {
         },
         {
             preserveScroll: true,
+        }
+    );
+}
+
+function proceedToCheckout(): void {
+    if (!isClubMember.value) {
+        router.get(route('checkout.index'));
+        return;
+    }
+
+    clubMemberCheckoutModalOpen.value = true;
+}
+
+function closeClubMemberCheckoutModal(): void {
+    clubMemberCheckoutModalOpen.value = false;
+}
+
+function continueWithClubPrice(): void {
+    closeClubMemberCheckoutModal();
+    router.get(route('checkout.index'));
+}
+
+function continueWithStandardPrice(): void {
+    isClubMember.value = false;
+    closeClubMemberCheckoutModal();
+
+    router.post(
+        route('cart.toggle-club-member'),
+        {
+            is_club_member: false,
+        },
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                router.get(route('checkout.index'));
+            },
         }
     );
 }
