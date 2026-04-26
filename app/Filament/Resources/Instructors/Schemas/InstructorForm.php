@@ -35,6 +35,15 @@ class InstructorForm
                     ->label('Zdjęcie')
                     ->image()
                     ->imageEditor()
+                    ->imageEditorAspectRatioOptions([
+                        '1:1',
+                    ])
+                    ->imageAspectRatio('1:1')
+                    ->automaticallyCropImagesToAspectRatio()
+                    ->imageEditorViewportWidth(320)
+                    ->imageEditorViewportHeight(320)
+                    ->automaticallyResizeImagesToWidth('1200')
+                    ->automaticallyResizeImagesToHeight('1200')
                     ->directory('instructors')
                     ->disk(config('filesystems.media_disk', 'public'))
                     ->visibility('public')
