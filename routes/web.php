@@ -4,6 +4,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\GunController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PanelController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -20,6 +21,14 @@ Route::middleware([
 });
 
 Route::get('/guns', [GunController::class, 'index'])->name('guns.index');
+
+Route::middleware([
+    'auth:sanctum',
+    config('jetstream.auth_session'),
+])->prefix('panel')->group(function () {
+    Route::get('/', [PanelController::class, 'index'])->name('panel.index');
+    Route::post('/orders/{order}/complete', [PanelController::class, 'complete'])->name('panel.orders.complete');
+});
 
 Route::prefix('cart')->group(function () {
     Route::get('/', [CartController::class, 'index'])->name('cart.index');

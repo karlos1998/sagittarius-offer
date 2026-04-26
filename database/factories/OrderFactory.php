@@ -33,10 +33,12 @@ class OrderFactory extends Factory
             'payment_method' => OrderPaymentMethod::PayOnSite,
             'payment_status' => OrderPaymentStatus::Pending,
             'is_club_member' => false,
+            'is_completed' => false,
             'total_shots' => 10,
             'total_amount' => 100,
             'verification_code_hash' => fake()->sha256(),
             'verification_code_expires_at' => now()->addMinutes(5),
+            'completed_at' => null,
             'download_token' => null,
         ];
     }

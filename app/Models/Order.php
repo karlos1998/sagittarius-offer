@@ -34,6 +34,8 @@ class Order extends Model
         'verification_code_expires_at',
         'verified_at',
         'paid_at',
+        'is_completed',
+        'completed_at',
         'download_token',
     ];
 
@@ -44,10 +46,12 @@ class Order extends Model
             'payment_method' => OrderPaymentMethod::class,
             'payment_status' => OrderPaymentStatus::class,
             'is_club_member' => 'boolean',
+            'is_completed' => 'boolean',
             'total_amount' => 'decimal:2',
             'verification_code_expires_at' => 'datetime',
             'verified_at' => 'datetime',
             'paid_at' => 'datetime',
+            'completed_at' => 'datetime',
         ];
     }
 
@@ -86,6 +90,23 @@ class Order extends Model
         $this->forceFill([
             'payment_status' => OrderPaymentStatus::Paid,
             'paid_at' => now(),
+        ])->save();
+    }
+
+    public function canBeCompleted(): bool
+    {
+        return ! $this->is_completed;
+    }
+
+    public function markAsCompleted(): void
+    {
+        if (! $this->canBeCompleted()) {
+            return;
+        }
+
+        $this->forceFill([
+            'is_completed' => true,
+            'completed_at' => now(),
         ])->save();
     }
 

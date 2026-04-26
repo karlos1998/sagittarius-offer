@@ -104,3 +104,16 @@ export interface CheckoutOrder {
     download_url?: string | null;
     items?: CheckoutOrderItem[];
 }
+
+export interface PanelOrder {
+    id: number;
+    order_number: string;
+    customer_full_name: string;
+    email: string;
+    status_label: string;
+    payment_status_label: string;
+    total_amount: number | string;
+    is_completed: boolean;
+    completed_at?: string | null;
+    created_at?: string | null;
+}
