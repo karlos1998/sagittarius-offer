@@ -47,6 +47,13 @@ export interface GunPackage {
     package_guns?: GunPackageGun[];
 }
 
+export interface Instructor {
+    id: number;
+    full_name: string;
+    description?: string | null;
+    photo_url?: string | null;
+}
+
 export interface CartSessionItem {
     gun_id: number;
     ammunitions: Record<string, number>;
