@@ -94,7 +94,7 @@
                     <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2 8h12l-2-8M7 13v8a2 2 0 002 2h6a2 2 0 002-2v-3" />
                     </svg>
-                    Dodaj do koszyka (5 strzałów)
+                    {{ addToCartShotsLabel }}
                 </span>
             </button>
         </div>
@@ -120,6 +120,13 @@ const emit = defineEmits(['add-to-cart']);
 
 const isInCart = computed(() => {
     return props.cart && props.cart[String(props.gun.id)] !== undefined;
+});
+
+const addToCartShotsLabel = computed(() => {
+    const firstAmmunition = props.gun.caliber?.ammunitions?.[0];
+    const quantityStep = Math.max(Number(firstAmmunition?.cart_quantity_step ?? 10), 1);
+
+    return `Dodaj do koszyka (${quantityStep} strzałów)`;
 });
 
 function handleImageError(event: Event): void {

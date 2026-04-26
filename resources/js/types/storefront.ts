@@ -3,6 +3,7 @@ export interface Ammunition {
     name: string;
     standard_price: number | string;
     club_price: number | string;
+    cart_quantity_step: number;
 }
 
 export interface Caliber {

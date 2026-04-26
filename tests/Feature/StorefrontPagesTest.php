@@ -3,13 +3,26 @@
 use App\Models\Ammunition;
 use App\Models\Caliber;
 use App\Models\Gun;
+use Inertia\Testing\AssertableInertia;
 
 it('renders home page', function () {
     $this->get(route('home'))->assertOk();
 });
 
 it('renders guns offer page', function () {
-    $this->get(route('guns.index'))->assertOk();
+    $caliber = Caliber::factory()->create();
+    Ammunition::factory()->for($caliber)->create([
+        'cart_quantity_step' => 10,
+    ]);
+    Gun::factory()->for($caliber)->create();
+
+    $this->get(route('guns.index'))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->component('Guns/Index')
+            ->has('guns', 1)
+            ->where('guns.0.caliber.ammunitions.0.cart_quantity_step', 10)
+        );
 });
 
 it('renders cart page with cart data', function () {

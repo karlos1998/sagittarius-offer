@@ -37,6 +37,7 @@ class GunResource extends JsonResource
                         'name' => $ammunition->name,
                         'standard_price' => $ammunition->standard_price,
                         'club_price' => $ammunition->club_price,
+                        'cart_quantity_step' => $ammunition->cart_quantity_step,
                     ])
                     ->values()
                     ->all(),
