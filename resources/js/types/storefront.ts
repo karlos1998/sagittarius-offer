@@ -111,6 +111,7 @@ export interface PanelOrder {
     customer_full_name: string;
     email: string;
     status_label: string;
+    payment_status: string;
     payment_status_label: string;
     total_amount: number | string;
     is_completed: boolean;

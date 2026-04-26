@@ -162,6 +162,21 @@
                     dla klienta
                     <strong>{{ selectedOrder.customer_full_name }}</strong>?
                 </p>
+
+                <label
+                    v-if="selectedOrder && selectedOrder.payment_status !== 'paid'"
+                    class="mt-4 flex items-start gap-3 rounded border border-black/15 bg-black/[0.03] px-4 py-3 text-left"
+                >
+                    <input
+                        v-model="completeForm.mark_as_paid"
+                        type="checkbox"
+                        class="mt-1 h-4 w-4 rounded border-black/30 text-black focus:ring-0"
+                    >
+                    <span class="text-sm text-gray-700">
+                        <span class="block font-semibold text-black">Zrealizuj i zaznacz jako opłacone</span>
+                        <span class="mt-1 block text-gray-600">Ta opcja od razu ustawi również status płatności jako opłacone.</span>
+                    </span>
+                </label>
             </template>
 
             <template #footer>
@@ -205,7 +220,9 @@ const props = withDefaults(
 const search = ref(props.filters.search ?? '');
 const completionModalOpen = ref(false);
 const selectedOrder = ref<PanelOrder | null>(null);
-const completeForm = useForm({});
+const completeForm = useForm({
+    mark_as_paid: false,
+});
 
 let debounceTimeout: ReturnType<typeof setTimeout> | null = null;
 
@@ -240,6 +257,7 @@ onUnmounted(() => {
 
 function openCompletionModal(order: PanelOrder): void {
     selectedOrder.value = order;
+    completeForm.mark_as_paid = false;
     completionModalOpen.value = true;
 }
 
@@ -250,6 +268,7 @@ function closeCompletionModal(): void {
 
     completionModalOpen.value = false;
     selectedOrder.value = null;
+    completeForm.reset();
 }
 
 function completeSelectedOrder(): void {

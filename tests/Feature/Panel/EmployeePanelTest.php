@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\OrderPaymentStatus;
 use App\Models\Order;
 use App\Models\User;
 
@@ -82,4 +83,28 @@ it('marks an order as completed from the employee panel', function () {
 
     expect($order->is_completed)->toBeTrue()
         ->and($order->completed_at)->not->toBeNull();
+});
+
+it('marks an order as completed and paid from the employee panel', function () {
+    $user = User::factory()->create();
+
+    $order = Order::factory()->create([
+        'order_number' => 'SO-COMPLETE-PAID-001',
+        'is_completed' => false,
+        'completed_at' => null,
+    ]);
+
+    $this
+        ->actingAs($user)
+        ->post(route('panel.orders.complete', $order), [
+            'mark_as_paid' => true,
+        ])
+        ->assertRedirect(route('panel.index'));
+
+    $order->refresh();
+
+    expect($order->is_completed)->toBeTrue()
+        ->and($order->completed_at)->not->toBeNull()
+        ->and($order->payment_status)->toBe(OrderPaymentStatus::Paid)
+        ->and($order->paid_at)->not->toBeNull();
 });

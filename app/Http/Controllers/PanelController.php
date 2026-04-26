@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Panel\PanelOrderIndexRequest;
+use App\Enums\OrderPaymentStatus;
 use App\Models\Order;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -48,6 +49,7 @@ class PanelController extends Controller
                 'customer_full_name' => $order->customer_full_name,
                 'email' => $order->email,
                 'status_label' => $order->statusLabel(),
+                'payment_status' => $order->payment_status->value,
                 'payment_status_label' => $order->paymentStatusLabel(),
                 'total_amount' => $order->total_amount,
                 'is_completed' => $order->is_completed,
@@ -67,10 +69,21 @@ class PanelController extends Controller
 
     public function complete(Order $order): RedirectResponse
     {
+        $shouldMarkAsPaid = request()->boolean('mark_as_paid')
+            && $order->payment_status !== OrderPaymentStatus::Paid;
+
         $order->markAsCompleted();
+
+        if ($shouldMarkAsPaid) {
+            $order->markAsPaid();
+        }
+
+        $message = $shouldMarkAsPaid
+            ? "Zamówienie {$order->order_number} zostało oznaczone jako zrealizowane i opłacone."
+            : "Zamówienie {$order->order_number} zostało oznaczone jako zrealizowane.";
 
         return redirect()
             ->route('panel.index')
-            ->with('success', "Zamówienie {$order->order_number} zostało oznaczone jako zrealizowane.");
+            ->with('success', $message);
     }
 }
