@@ -22,7 +22,7 @@
                     :key="instructor.id"
                     class="overflow-hidden rounded-3xl border border-black/10 bg-white shadow-sm transition-transform duration-200 hover:-translate-y-1"
                 >
-                    <div class="aspect-[4/3] overflow-hidden bg-stone-200">
+                    <div class="aspect-square overflow-hidden bg-stone-200">
                         <img
                             v-if="instructor.photo_url"
                             :src="instructor.photo_url"
