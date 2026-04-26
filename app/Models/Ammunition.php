@@ -15,11 +15,13 @@ class Ammunition extends Model
         'caliber_id',
         'club_price',
         'standard_price',
+        'cart_quantity_step',
     ];
 
     protected $casts = [
         'club_price' => 'decimal:2',
         'standard_price' => 'decimal:2',
+        'cart_quantity_step' => 'integer',
     ];
 
     public function caliber(): BelongsTo

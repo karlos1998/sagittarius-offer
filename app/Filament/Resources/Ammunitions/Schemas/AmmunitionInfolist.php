@@ -20,6 +20,9 @@ class AmmunitionInfolist
                 TextEntry::make('standard_price')
                     ->money()
                     ->placeholder('-'),
+                TextEntry::make('cart_quantity_step')
+                    ->label('Krok ilości w koszyku')
+                    ->placeholder('-'),
                 TextEntry::make('created_at')
                     ->dateTime()
                     ->placeholder('-'),

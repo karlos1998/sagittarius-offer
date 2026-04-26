@@ -29,6 +29,10 @@ class AmmunitionsTable
                     ->label('Cena standardowa')
                     ->money('PLN')
                     ->sortable(),
+                TextColumn::make('cart_quantity_step')
+                    ->label('Krok ilości')
+                    ->numeric()
+                    ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

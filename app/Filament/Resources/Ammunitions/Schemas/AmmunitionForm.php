@@ -27,6 +27,13 @@ class AmmunitionForm
                     ->label('Cena standardowa')
                     ->numeric()
                     ->prefix('PLN'),
+                TextInput::make('cart_quantity_step')
+                    ->label('Krok ilości w koszyku')
+                    ->numeric()
+                    ->integer()
+                    ->minValue(1)
+                    ->default(10)
+                    ->required(),
             ]);
     }
 }

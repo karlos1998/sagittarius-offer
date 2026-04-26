@@ -82,3 +82,69 @@ it('removes gun from cart without ammo id', function () {
 
     expect(session('cart', []))->toBe([]);
 });
+
+it('adds gun to cart with ammunition quantity step from ammunition model', function () {
+    $caliber = Caliber::factory()->create();
+    $ammunition = Ammunition::factory()->for($caliber)->create([
+        'cart_quantity_step' => 10,
+    ]);
+    $gun = Gun::factory()->for($caliber)->create();
+
+    $this->post(route('cart.add'), [
+        'gun_id' => $gun->id,
+    ])->assertRedirect();
+
+    expect(session('cart', []))->toMatchArray([
+        $gun->id => [
+            'gun_id' => $gun->id,
+            'ammunitions' => [
+                $ammunition->id => 10,
+            ],
+            'package_id' => null,
+            'package_name' => null,
+            'package_guns' => [],
+        ],
+    ]);
+});
+
+it('updates cart quantities using ammunition quantity step from ammunition model', function () {
+    $caliber = Caliber::factory()->create();
+    $ammunition = Ammunition::factory()->for($caliber)->create([
+        'cart_quantity_step' => 10,
+    ]);
+    $gun = Gun::factory()->for($caliber)->create();
+
+    $this->withSession([
+        'cart' => [
+            $gun->id => [
+                'gun_id' => $gun->id,
+                'ammunitions' => [
+                    $ammunition->id => 10,
+                ],
+                'package_id' => null,
+                'package_name' => null,
+                'package_guns' => [],
+            ],
+        ],
+    ]);
+
+    $this->post(route('cart.update'), [
+        'gun_id' => $gun->id,
+        'action' => 'increase',
+        'ammo_id' => $ammunition->id,
+    ])
+        ->assertRedirect()
+        ->assertSessionHas('success', 'Koszyk został zaktualizowany');
+
+    expect(session('cart')[$gun->id]['ammunitions'][$ammunition->id])->toBe(20);
+
+    $this->post(route('cart.update'), [
+        'gun_id' => $gun->id,
+        'action' => 'decrease',
+        'ammo_id' => $ammunition->id,
+    ])
+        ->assertRedirect()
+        ->assertSessionHas('success', 'Koszyk został zaktualizowany');
+
+    expect(session('cart')[$gun->id]['ammunitions'][$ammunition->id])->toBe(10);
+});

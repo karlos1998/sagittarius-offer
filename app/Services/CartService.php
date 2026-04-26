@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\CartAction;
+use App\Models\Ammunition;
 use App\Models\Gun;
 use App\Models\GunPackage;
 
@@ -76,7 +77,7 @@ class CartService
                 $cart[$gunId] = [
                     'gun_id' => $gunId,
                     'ammunitions' => [
-                        $firstAmmo->id => 5,
+                        $firstAmmo->id => $this->resolveCartQuantityStep($firstAmmo),
                     ],
                     'package_id' => null,
                     'package_name' => null,
@@ -222,9 +223,9 @@ class CartService
     private function increaseAmmunition(array &$cart, int $gunId, ?int $ammoId): void
     {
         if ($ammoId && isset($cart[$gunId]['ammunitions'][$ammoId])) {
-            $cart[$gunId]['ammunitions'][$ammoId] += 5;
+            $cart[$gunId]['ammunitions'][$ammoId] += $this->getAmmunitionCartQuantityStep($ammoId);
         } elseif ($ammoId) {
-            $cart[$gunId]['ammunitions'][$ammoId] = 5;
+            $cart[$gunId]['ammunitions'][$ammoId] = $this->getAmmunitionCartQuantityStep($ammoId);
         }
     }
 
@@ -234,7 +235,7 @@ class CartService
     private function decreaseAmmunition(array &$cart, int $gunId, ?int $ammoId): void
     {
         if ($ammoId && isset($cart[$gunId]['ammunitions'][$ammoId])) {
-            $cart[$gunId]['ammunitions'][$ammoId] = max(0, $cart[$gunId]['ammunitions'][$ammoId] - 5);
+            $cart[$gunId]['ammunitions'][$ammoId] = max(0, $cart[$gunId]['ammunitions'][$ammoId] - $this->getAmmunitionCartQuantityStep($ammoId));
             if ($cart[$gunId]['ammunitions'][$ammoId] == 0) {
                 unset($cart[$gunId]['ammunitions'][$ammoId]);
                 if (empty($cart[$gunId]['ammunitions'])) {
@@ -258,7 +259,7 @@ class CartService
     private function addAmmunition(array &$cart, int $gunId, ?int $ammoId): void
     {
         if ($ammoId && ! isset($cart[$gunId]['ammunitions'][$ammoId])) {
-            $cart[$gunId]['ammunitions'][$ammoId] = 5;
+            $cart[$gunId]['ammunitions'][$ammoId] = $this->getAmmunitionCartQuantityStep($ammoId);
         }
     }
 
@@ -281,8 +282,20 @@ class CartService
     private function changeAmmunition(array &$cart, int $gunId, ?int $ammoId): void
     {
         if ($ammoId && ! isset($cart[$gunId]['ammunitions'][$ammoId])) {
-            $cart[$gunId]['ammunitions'][$ammoId] = 5;
+            $cart[$gunId]['ammunitions'][$ammoId] = $this->getAmmunitionCartQuantityStep($ammoId);
         }
+    }
+
+    private function getAmmunitionCartQuantityStep(int $ammoId): int
+    {
+        $ammunition = Ammunition::query()->findOrFail($ammoId);
+
+        return $this->resolveCartQuantityStep($ammunition);
+    }
+
+    private function resolveCartQuantityStep(Ammunition $ammunition): int
+    {
+        return max((int) $ammunition->cart_quantity_step, 1);
     }
 
     /**

@@ -21,6 +21,7 @@ class AmmunitionFactory extends Factory
             'caliber_id' => Caliber::factory(),
             'club_price' => fake()->randomFloat(2, 1.5, 8.0),
             'standard_price' => fake()->randomFloat(2, 2.0, 10.0),
+            'cart_quantity_step' => fake()->randomElement([5, 10, 15]),
         ];
     }
 }
