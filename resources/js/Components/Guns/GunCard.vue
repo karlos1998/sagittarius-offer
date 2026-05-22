@@ -1,22 +1,7 @@
 <template>
     <div
         class="overflow-hidden rounded border border-black/30 bg-white transition-colors hover:border-black">
-        <!-- Gun Image -->
-        <div class="relative aspect-video overflow-hidden border-b border-black/20 bg-white">
-            <div v-if="gun.photos && gun.photos.length > 0" class="flex w-full h-full items-center justify-center p-2">
-                <img
-                    :src="gun.photo_urls?.[0] || gun.photos[0]"
-                    :alt="gun.name"
-                    class="max-h-full max-w-full h-auto w-auto object-contain"
-                    @error="handleImageError"
-                />
-            </div>
-            <div v-else class="w-full h-full flex items-center justify-center">
-                <svg class="h-12 w-12 text-black/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-            </div>
-        </div>
+        <ExpandableGunPhoto :src="previewPhoto" :alt="gun.name" />
 
         <!-- Gun Info -->
         <div class="p-6">
@@ -105,6 +90,7 @@
 import { computed } from 'vue';
 import type { CartMap, Gun } from '@/types/storefront';
 import { formatCurrencyPLN } from '@/utils/format';
+import ExpandableGunPhoto from './ExpandableGunPhoto.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -129,15 +115,7 @@ const addToCartShotsLabel = computed(() => {
     return `Dodaj do koszyka (${quantityStep} strzałów)`;
 });
 
-function handleImageError(event: Event): void {
-    const target = event.target as HTMLImageElement | null;
-
-    if (!target) {
-        return;
-    }
-
-    target.style.display = 'none';
-}
+const previewPhoto = computed(() => props.gun.photo_urls?.[0] || props.gun.photos?.[0] || null);
 
 function addToCart(): void {
     if (!isInCart.value) {
