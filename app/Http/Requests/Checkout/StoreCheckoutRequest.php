@@ -3,11 +3,14 @@
 namespace App\Http\Requests\Checkout;
 
 use App\Enums\OrderPaymentMethod;
+use App\Http\Requests\Concerns\ValidatesTurnstile;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class StoreCheckoutRequest extends FormRequest
 {
+    use ValidatesTurnstile;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -33,6 +36,7 @@ class StoreCheckoutRequest extends FormRequest
             'city' => ['required', 'string', 'max:120'],
             'email' => ['required', 'email:rfc', 'max:255'],
             'payment_method' => ['required', Rule::in([OrderPaymentMethod::PayOnSite->value])],
+            'turnstile_token' => $this->turnstileRules(),
         ];
     }
 
@@ -53,6 +57,7 @@ class StoreCheckoutRequest extends FormRequest
             'email.email' => 'Podaj poprawny adres e-mail.',
             'payment_method.required' => 'Wybierz formę płatności.',
             'payment_method.in' => 'Wybrana forma płatności jest nieprawidłowa.',
+            ...$this->turnstileMessages(),
         ];
     }
 

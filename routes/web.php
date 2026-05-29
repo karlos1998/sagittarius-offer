@@ -42,13 +42,13 @@ Route::prefix('cart')->group(function () {
 Route::prefix('checkout')->group(function () {
     Route::get('/', [CheckoutController::class, 'index'])->name('checkout.index');
     Route::post('/', [CheckoutController::class, 'store'])
-        ->middleware('throttle:6,1')
+        ->middleware('throttle:checkout-email')
         ->name('checkout.store');
     Route::post('/resend-code', [CheckoutController::class, 'resendCode'])
-        ->middleware('throttle:3,1')
+        ->middleware('throttle:checkout-email')
         ->name('checkout.resend-code');
     Route::post('/verify', [CheckoutController::class, 'verify'])
-        ->middleware('throttle:10,1')
+        ->middleware('throttle:checkout-code')
         ->name('checkout.verify');
 });
 

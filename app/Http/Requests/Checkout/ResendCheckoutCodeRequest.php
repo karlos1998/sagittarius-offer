@@ -5,7 +5,7 @@ namespace App\Http\Requests\Checkout;
 use App\Http\Requests\Concerns\ValidatesTurnstile;
 use Illuminate\Foundation\Http\FormRequest;
 
-class VerifyCheckoutCodeRequest extends FormRequest
+class ResendCheckoutCodeRequest extends FormRequest
 {
     use ValidatesTurnstile;
 
@@ -25,7 +25,6 @@ class VerifyCheckoutCodeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'code' => ['required', 'digits:6'],
             'turnstile_token' => $this->turnstileRules(),
         ];
     }
@@ -35,15 +34,6 @@ class VerifyCheckoutCodeRequest extends FormRequest
      */
     public function messages(): array
     {
-        return [
-            'code.required' => 'Kod weryfikacyjny jest wymagany.',
-            'code.digits' => 'Kod weryfikacyjny musi mieć 6 cyfr.',
-            ...$this->turnstileMessages(),
-        ];
-    }
-
-    public function getCode(): string
-    {
-        return $this->validated()['code'];
+        return $this->turnstileMessages();
     }
 }

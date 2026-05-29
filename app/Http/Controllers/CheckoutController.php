@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Checkout\ResendCheckoutCodeRequest;
 use App\Http\Requests\Checkout\StoreCheckoutRequest;
 use App\Http\Requests\Checkout\VerifyCheckoutCodeRequest;
 use App\Models\Order;
 use App\Services\CheckoutService;
+use App\Services\TurnstileService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -15,7 +17,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class CheckoutController extends Controller
 {
     public function __construct(
-        private CheckoutService $checkoutService
+        private CheckoutService $checkoutService,
+        private TurnstileService $turnstileService
     ) {}
 
     public function index(Request $request): Response|RedirectResponse
@@ -36,6 +39,7 @@ class CheckoutController extends Controller
             'checkoutStep' => $this->checkoutService->determineCheckoutStep($order),
             'paymentMethods' => $this->checkoutService->paymentMethodsForFrontend(),
             'order' => $order ? $this->checkoutService->mapOrderForFrontend($order) : null,
+            'turnstile' => $this->turnstileService->configurationForFrontend(),
         ]);
     }
 
@@ -58,7 +62,7 @@ class CheckoutController extends Controller
             ->with('success', 'Wysłaliśmy kod weryfikacyjny na podany adres e-mail.');
     }
 
-    public function resendCode(Request $request): RedirectResponse
+    public function resendCode(ResendCheckoutCodeRequest $request): RedirectResponse
     {
         $order = $this->checkoutService->getCheckoutOrderFromSession($request);
 

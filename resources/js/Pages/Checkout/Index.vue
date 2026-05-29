@@ -157,9 +157,22 @@
                                 <InputError :message="detailsForm.errors.payment_method" class="mt-2" />
                             </div>
 
+                            <div v-if="isTurnstileEnabled">
+                                <TurnstileWidget
+                                    :enabled="isTurnstileEnabled"
+                                    :site-key="turnstileSiteKey"
+                                    :reset-key="detailsTurnstileResetKey"
+                                    action="checkout_order"
+                                    @verified="setDetailsTurnstileToken"
+                                    @expired="clearDetailsTurnstileToken"
+                                    @error="clearDetailsTurnstileToken"
+                                />
+                                <InputError :message="detailsForm.errors.turnstile_token" class="mt-2" />
+                            </div>
+
                             <button
                                 type="submit"
-                                :disabled="detailsForm.processing"
+                                :disabled="isDetailsSubmitDisabled"
                                 class="w-full rounded border border-black bg-black px-5 py-2 text-sm font-medium text-white hover:bg-white hover:text-black disabled:opacity-60"
                             >
                                 {{ detailsForm.processing ? 'Zapisywanie...' : 'Zapisz i wyślij kod' }}
@@ -188,9 +201,22 @@
                                 <InputError :message="verifyForm.errors.code" class="mt-2" />
                             </div>
 
+                            <div v-if="isTurnstileEnabled">
+                                <TurnstileWidget
+                                    :enabled="isTurnstileEnabled"
+                                    :site-key="turnstileSiteKey"
+                                    :reset-key="verifyTurnstileResetKey"
+                                    action="checkout_verify"
+                                    @verified="setVerifyTurnstileToken"
+                                    @expired="clearVerifyTurnstileToken"
+                                    @error="clearVerifyTurnstileToken"
+                                />
+                                <InputError :message="verificationTurnstileError" class="mt-2" />
+                            </div>
+
                             <button
                                 type="submit"
-                                :disabled="verifyForm.processing"
+                                :disabled="isVerifySubmitDisabled"
                                 class="w-full rounded border border-black bg-black px-5 py-2 text-sm font-medium text-white hover:bg-white hover:text-black disabled:opacity-60"
                             >
                                 {{ verifyForm.processing ? 'Weryfikacja...' : 'Przejdź dalej' }}
@@ -200,7 +226,7 @@
                         <button
                             v-if="isCodeExpired"
                             type="button"
-                            :disabled="resendForm.processing"
+                            :disabled="isResendSubmitDisabled"
                             @click="resendCode"
                             class="mt-3 w-full rounded border border-black px-5 py-2 text-sm font-medium hover:bg-black hover:text-white disabled:opacity-60"
                         >
@@ -246,7 +272,8 @@ import { computed, onUnmounted, ref } from 'vue';
 import { Link, useForm } from '@inertiajs/vue3';
 import InputError from '@/Components/InputError.vue';
 import SimpleNavbar from '@/Components/Common/SimpleNavbar.vue';
-import type { CartMap, CheckoutOrder, Gun, PaymentMethodOption } from '@/types/storefront';
+import TurnstileWidget from '@/Components/TurnstileWidget.vue';
+import type { CartMap, CheckoutOrder, Gun, PaymentMethodOption, TurnstileConfig } from '@/types/storefront';
 import { buildCartDisplayItems, calculateTotalPrice, calculateTotalShots } from '@/utils/cart';
 import { formatPrice } from '@/utils/format';
 
@@ -260,6 +287,7 @@ const props = withDefaults(
         checkoutStep?: CheckoutStep;
         paymentMethods?: PaymentMethodOption[];
         order?: CheckoutOrder | null;
+        turnstile?: TurnstileConfig;
     }>(),
     {
         cart: () => ({}),
@@ -268,6 +296,10 @@ const props = withDefaults(
         checkoutStep: 'details',
         paymentMethods: () => [],
         order: null,
+        turnstile: () => ({
+            enabled: false,
+            site_key: null,
+        }),
     }
 );
 
@@ -281,14 +313,20 @@ const detailsForm = useForm({
     city: '',
     email: '',
     payment_method: props.paymentMethods[0]?.value ?? 'pay_on_site',
+    turnstile_token: '',
 });
 
 const verifyForm = useForm({
     code: '',
+    turnstile_token: '',
 });
 
-const resendForm = useForm({});
+const resendForm = useForm({
+    turnstile_token: '',
+});
 const currentTimestamp = ref(Date.now());
+const detailsTurnstileResetKey = ref(0);
+const verifyTurnstileResetKey = ref(0);
 const currentTimestampInterval = setInterval(() => {
     currentTimestamp.value = Date.now();
 }, 1000);
@@ -310,6 +348,12 @@ const stepLabel = computed(() => {
 });
 
 const cartItems = computed(() => buildCartDisplayItems(props.cart, props.guns, props.isClubMember));
+const isTurnstileEnabled = computed(() => props.turnstile?.enabled === true && Boolean(props.turnstile.site_key));
+const turnstileSiteKey = computed(() => props.turnstile?.site_key ?? null);
+const isDetailsSubmitDisabled = computed(() => detailsForm.processing || (isTurnstileEnabled.value && !detailsForm.turnstile_token));
+const isVerifySubmitDisabled = computed(() => verifyForm.processing || (isTurnstileEnabled.value && !verifyForm.turnstile_token));
+const isResendSubmitDisabled = computed(() => resendForm.processing || (isTurnstileEnabled.value && !resendForm.turnstile_token));
+const verificationTurnstileError = computed(() => verifyForm.errors.turnstile_token || resendForm.errors.turnstile_token);
 
 const totalShots = computed(() => {
     if (props.checkoutStep === 'complete' && props.order) {
@@ -336,15 +380,49 @@ const isCodeExpired = computed(() => {
 });
 
 function submitOrder(): void {
-    detailsForm.post(route('checkout.store'));
+    detailsForm.post(route('checkout.store'), {
+        onFinish: resetDetailsTurnstile,
+    });
 }
 
 function verifyCode(): void {
-    verifyForm.post(route('checkout.verify'));
+    verifyForm.post(route('checkout.verify'), {
+        onFinish: resetVerifyTurnstile,
+    });
 }
 
 function resendCode(): void {
-    resendForm.post(route('checkout.resend-code'));
+    resendForm.post(route('checkout.resend-code'), {
+        onFinish: resetVerifyTurnstile,
+    });
+}
+
+function setDetailsTurnstileToken(token: string): void {
+    detailsForm.turnstile_token = token;
+}
+
+function clearDetailsTurnstileToken(): void {
+    detailsForm.turnstile_token = '';
+}
+
+function resetDetailsTurnstile(): void {
+    clearDetailsTurnstileToken();
+    detailsTurnstileResetKey.value += 1;
+}
+
+function setVerifyTurnstileToken(token: string): void {
+    verifyForm.turnstile_token = token;
+    resendForm.turnstile_token = token;
+}
+
+function clearVerifyTurnstileToken(): void {
+    verifyForm.turnstile_token = '';
+    resendForm.turnstile_token = '';
+}
+
+function resetVerifyTurnstile(): void {
+    clearVerifyTurnstileToken();
+    verifyTurnstileResetKey.value += 1;
 }
 
 function formatDate(value: string | null | undefined): string {

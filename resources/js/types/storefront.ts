@@ -82,6 +82,11 @@ export interface PaymentMethodOption {
     label: string;
 }
 
+export interface TurnstileConfig {
+    enabled: boolean;
+    site_key?: string | null;
+}
+
 export interface CheckoutOrderItem {
     gun_name: string;
     ammunition_name: string;
