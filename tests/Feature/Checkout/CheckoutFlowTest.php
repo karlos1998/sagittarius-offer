@@ -16,6 +16,7 @@ use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Mockery\MockInterface;
 
 beforeEach(function () {
@@ -65,14 +66,17 @@ it('creates confirmed order and sends voucher immediately by default', function 
             'payment_method' => OrderPaymentMethod::PayOnSite->value,
         ]);
 
+    $order = Order::query()->first();
+
     $response
-        ->assertRedirect(route('checkout.index'))
+        ->assertRedirect(route('checkout.show', ['order' => $order->public_id]))
+        ->assertSessionHas('checkout_order_id', $order->id)
         ->assertSessionMissing('cart')
         ->assertSessionMissing('is_club_member');
 
-    $order = Order::query()->first();
-
     expect($order)->not->toBeNull();
+    expect($order->id)->toBeInt();
+    expect(Str::isUuid($order->public_id))->toBeTrue();
     expect($order->status)->toBe(OrderStatus::Confirmed);
     expect($order->payment_status)->toBe(OrderPaymentStatus::Pending);
     expect((float) $order->total_amount)->toBe(50.0);
@@ -88,6 +92,7 @@ it('creates confirmed order and sends voucher immediately by default', function 
     expect($order->city)->toBe('Kraków');
 
     expect(OrderItem::query()->count())->toBe(1);
+    expect(OrderItem::query()->first()?->order_id)->toBe($order->id);
 
     Mail::assertSent(OrderConfirmedMail::class, function (OrderConfirmedMail $mail) use ($order): bool {
         return $mail->hasTo($order->email)
@@ -135,11 +140,15 @@ it('can require email verification before issuing the voucher', function () {
             'payment_method' => OrderPaymentMethod::PayOnSite->value,
         ]);
 
-    $response->assertRedirect(route('checkout.index'));
-
     $order = Order::query()->first();
 
+    $response
+        ->assertRedirect(route('checkout.show', ['order' => $order->public_id]))
+        ->assertSessionHas('checkout_order_id', $order->id);
+
     expect($order)->not->toBeNull();
+    expect($order->id)->toBeInt();
+    expect(Str::isUuid($order->public_id))->toBeTrue();
     expect($order->status)->toBe(OrderStatus::PendingVerification);
     expect($order->verified_at)->toBeNull();
     expect($order->download_token)->toBeNull();
@@ -152,6 +161,14 @@ it('can require email verification before issuing the voucher', function () {
             && strlen($mail->verificationCode) === 6;
     });
     Mail::assertNotSent(OrderConfirmedMail::class);
+
+    $this
+        ->get(route('checkout.show', ['order' => $order->public_id]))
+        ->assertOk();
+
+    $this
+        ->get('/checkout/'.$order->id)
+        ->assertNotFound();
 });
 
 it('stores package details on order items when gun comes from package', function () {
@@ -217,7 +234,7 @@ it('stores package details on order items when gun comes from package', function
             'email' => 'jan@example.com',
             'payment_method' => OrderPaymentMethod::PayOnSite->value,
         ])
-        ->assertRedirect(route('checkout.index'));
+        ->assertRedirect();
 
     $orderItem = OrderItem::query()->first();
 
@@ -250,12 +267,12 @@ it('verifies order with code, clears cart, and sends pdf email', function () {
             'cart' => ['test' => ['gun_id' => 1, 'ammunitions' => [1 => 5]]],
             'is_club_member' => true,
         ])
-        ->post(route('checkout.verify'), [
+        ->post(route('checkout.verify', ['order' => $order->public_id]), [
             'code' => '123456',
         ]);
 
     $response
-        ->assertRedirect(route('checkout.index'))
+        ->assertRedirect(route('checkout.show', ['order' => $order->public_id]))
         ->assertSessionMissing('cart')
         ->assertSessionMissing('is_club_member');
 
@@ -290,9 +307,9 @@ it('resends a different verification code and extends validity to 5 minutes', fu
         ->withSession([
             'checkout_order_id' => $order->id,
         ])
-        ->post(route('checkout.resend-code'));
+        ->post(route('checkout.resend-code', ['order' => $order->public_id]));
 
-    $response->assertRedirect(route('checkout.index'));
+    $response->assertRedirect(route('checkout.show', ['order' => $order->public_id]));
 
     $order->refresh();
 
@@ -317,11 +334,15 @@ it('allows downloading pdf only with valid token', function () {
     OrderItem::factory()->for($order)->create();
 
     $this
-        ->get(route('orders.download-pdf', ['order' => $order, 'token' => 'invalid-token']))
+        ->get(route('checkout.show', ['order' => $order->public_id]))
+        ->assertOk();
+
+    $this
+        ->get(route('orders.download-pdf', ['order' => $order->public_id, 'token' => 'invalid-token']))
         ->assertForbidden();
 
     $this
-        ->get(route('orders.download-pdf', ['order' => $order, 'token' => 'valid-token']))
+        ->get(route('orders.download-pdf', ['order' => $order->public_id, 'token' => 'valid-token']))
         ->assertSuccessful()
         ->assertHeader('content-type', 'application/pdf');
 });

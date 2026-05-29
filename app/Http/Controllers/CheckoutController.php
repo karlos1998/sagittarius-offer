@@ -32,6 +32,25 @@ class CheckoutController extends Controller
                 ->with('error', 'Koszyk jest pusty. Dodaj produkty, aby przejść do zamówienia.');
         }
 
+        if ($order) {
+            return redirect()->route('checkout.show', $this->publicOrderRouteParameters($order));
+        }
+
+        return $this->renderCheckout(null, $cartData);
+    }
+
+    public function show(Request $request, Order $order): Response
+    {
+        $request->session()->put('checkout_order_id', $order->id);
+
+        return $this->renderCheckout($order, $this->checkoutService->getCartWithGuns());
+    }
+
+    /**
+     * @param  array{cart: array<int|string, mixed>, guns: \Illuminate\Support\Collection<int, mixed>, gunPackages: \Illuminate\Support\Collection<int, mixed>}  $cartData
+     */
+    private function renderCheckout(?Order $order, array $cartData): Response
+    {
         return Inertia::render('Checkout/Index', [
             'cart' => $cartData['cart'],
             'guns' => $cartData['guns'],
@@ -62,48 +81,32 @@ class CheckoutController extends Controller
             $this->checkoutService->confirmOrder($result['order']);
 
             return redirect()
-                ->route('checkout.index')
+                ->route('checkout.show', $this->publicOrderRouteParameters($result['order']))
                 ->with('success', 'Voucher jest gotowy. Możesz pobrać PDF poniżej.');
         }
 
         return redirect()
-            ->route('checkout.index')
+            ->route('checkout.show', $this->publicOrderRouteParameters($result['order']))
             ->with('success', 'Wysłaliśmy kod weryfikacyjny na podany adres e-mail.');
     }
 
-    public function resendCode(ResendCheckoutCodeRequest $request): RedirectResponse
+    public function resendCode(ResendCheckoutCodeRequest $request, Order $order): RedirectResponse
     {
-        $order = $this->checkoutService->getCheckoutOrderFromSession($request);
-
-        if (! $order) {
-            return redirect()
-                ->route('checkout.index')
-                ->with('error', 'Nie znaleziono aktywnego zamówienia do weryfikacji.');
-        }
-
         if ($order->verified_at !== null) {
-            return redirect()->route('checkout.index');
+            return redirect()->route('checkout.show', $this->publicOrderRouteParameters($order));
         }
 
         $this->checkoutService->resendVerificationCode($order);
 
         return redirect()
-            ->route('checkout.index')
+            ->route('checkout.show', $this->publicOrderRouteParameters($order))
             ->with('success', 'Wysłaliśmy nowy kod weryfikacyjny na podany adres e-mail.');
     }
 
-    public function verify(VerifyCheckoutCodeRequest $request): RedirectResponse
+    public function verify(VerifyCheckoutCodeRequest $request, Order $order): RedirectResponse
     {
-        $order = $this->checkoutService->getCheckoutOrderFromSession($request);
-
-        if (! $order) {
-            return redirect()
-                ->route('checkout.index')
-                ->with('error', 'Nie znaleziono aktywnego zamówienia do weryfikacji.');
-        }
-
         if ($order->verified_at !== null) {
-            return redirect()->route('checkout.index');
+            return redirect()->route('checkout.show', $this->publicOrderRouteParameters($order));
         }
 
         $validationError = $this->checkoutService->validateVerificationCode($order, $request->getCode());
@@ -117,7 +120,7 @@ class CheckoutController extends Controller
         $this->checkoutService->confirmOrder($order);
 
         return redirect()
-            ->route('checkout.index')
+            ->route('checkout.show', $this->publicOrderRouteParameters($order))
             ->with('success', 'Zamówienie zostało potwierdzone. Możesz pobrać PDF.');
     }
 
@@ -137,5 +140,13 @@ class CheckoutController extends Controller
             $fileName,
             ['Content-Type' => 'application/pdf']
         );
+    }
+
+    /**
+     * @return array{order: string}
+     */
+    private function publicOrderRouteParameters(Order $order): array
+    {
+        return ['order' => $order->public_id];
     }
 }

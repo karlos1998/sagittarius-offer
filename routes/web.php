@@ -44,13 +44,14 @@ Route::prefix('checkout')->group(function () {
     Route::post('/', [CheckoutController::class, 'store'])
         ->middleware('throttle:checkout-email')
         ->name('checkout.store');
-    Route::post('/resend-code', [CheckoutController::class, 'resendCode'])
+    Route::get('/{order:public_id}', [CheckoutController::class, 'show'])->name('checkout.show');
+    Route::post('/{order:public_id}/resend-code', [CheckoutController::class, 'resendCode'])
         ->middleware('throttle:checkout-email')
         ->name('checkout.resend-code');
-    Route::post('/verify', [CheckoutController::class, 'verify'])
+    Route::post('/{order:public_id}/verify', [CheckoutController::class, 'verify'])
         ->middleware('throttle:checkout-code')
         ->name('checkout.verify');
 });
 
-Route::get('/orders/{order}/pdf', [CheckoutController::class, 'downloadPdf'])
+Route::get('/orders/{order:public_id}/pdf', [CheckoutController::class, 'downloadPdf'])
     ->name('orders.download-pdf');

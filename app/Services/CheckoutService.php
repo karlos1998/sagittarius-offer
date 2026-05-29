@@ -231,6 +231,7 @@ class CheckoutService
     {
         return [
             'id' => $order->id,
+            'public_id' => $order->public_id,
             'order_number' => $order->order_number,
             'first_name' => $order->first_name,
             'last_name' => $order->last_name,
@@ -251,9 +252,10 @@ class CheckoutService
             'total_shots' => $order->total_shots,
             'total_amount' => $order->total_amount,
             'verification_code_expires_at' => $order->verification_code_expires_at?->toIso8601String(),
+            'checkout_url' => route('checkout.show', ['order' => $order->public_id]),
             'download_url' => $order->verified_at
                 ? route('orders.download-pdf', [
-                    'order' => $order,
+                    'order' => $order->public_id,
                     'token' => $order->download_token,
                 ])
                 : null,

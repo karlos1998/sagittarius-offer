@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
@@ -42,14 +43,27 @@ class AppServiceProvider extends ServiceProvider
     private function checkoutEmailThrottleKey(Request $request): string
     {
         $email = trim(Str::lower((string) $request->input('email', '')));
-        $identifier = $email !== '' ? $email : (string) $request->session()->get('checkout_order_id', 'guest');
+        $identifier = $email !== ''
+            ? $email
+            : (string) ($this->routeOrderKey($request) ?? $request->session()->get('checkout_order_id', 'guest'));
 
         return $identifier.'|'.$request->ip();
     }
 
     private function checkoutCodeThrottleKey(Request $request): string
     {
-        return (string) $request->session()->get('checkout_order_id', 'guest').'|'.$request->ip();
+        return (string) ($this->routeOrderKey($request) ?? $request->session()->get('checkout_order_id', 'guest')).'|'.$request->ip();
+    }
+
+    private function routeOrderKey(Request $request): ?string
+    {
+        $order = $request->route('order');
+
+        if ($order instanceof Model) {
+            return (string) $order->getKey();
+        }
+
+        return is_string($order) ? $order : null;
     }
 
     /**

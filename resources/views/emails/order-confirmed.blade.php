@@ -98,7 +98,7 @@
                             <table role="presentation" cellspacing="0" cellpadding="0" style="margin-bottom: 10px;">
                                 <tr>
                                     <td>
-                                        <a href="{{ route('orders.download-pdf', ['order' => $order, 'token' => $order->download_token]) }}"
+                                        <a href="{{ route('orders.download-pdf', ['order' => $order->public_id, 'token' => $order->download_token]) }}"
                                            style="display: inline-block; background-color: #111827; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; padding: 12px 18px; border-radius: 8px;">
                                             Pobierz PDF zamówienia
                                         </a>
@@ -106,6 +106,11 @@
                                 </tr>
                             </table>
                         @endif
+
+                        <p style="margin: 10px 0 0; font-size: 13px; line-height: 1.6; color: #6b7280;">
+                            Link do zamówienia:
+                            <a href="{{ route('checkout.show', ['order' => $order->public_id]) }}" style="color: #111827;">{{ route('checkout.show', ['order' => $order->public_id]) }}</a>
+                        </p>
                     </td>
                 </tr>
 

@@ -20,6 +20,7 @@ class OrderFactory extends Factory
     public function definition(): array
     {
         return [
+            'public_id' => (string) Str::uuid(),
             'order_number' => 'SO-'.now()->format('YmdHis').'-'.strtoupper(Str::random(5)),
             'first_name' => fake()->firstName(),
             'last_name' => fake()->lastName(),

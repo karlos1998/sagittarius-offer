@@ -8,6 +8,7 @@ use App\Enums\OrderStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Order extends Model
 {
@@ -15,6 +16,7 @@ class Order extends Model
     use HasFactory;
 
     protected $fillable = [
+        'public_id',
         'order_number',
         'first_name',
         'last_name',
@@ -53,6 +55,15 @@ class Order extends Model
             'paid_at' => 'datetime',
             'completed_at' => 'datetime',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (Order $order): void {
+            if (empty($order->public_id)) {
+                $order->public_id = (string) Str::uuid();
+            }
+        });
     }
 
     public function items(): HasMany

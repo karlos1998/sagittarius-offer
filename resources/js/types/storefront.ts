@@ -98,6 +98,7 @@ export interface CheckoutOrderItem {
 
 export interface CheckoutOrder {
     id: number;
+    public_id: string;
     order_number: string;
     email: string;
     full_address: string;
@@ -107,6 +108,7 @@ export interface CheckoutOrder {
     total_amount: number | string;
     verification_code_expires_at?: string | null;
     verification_code_valid_for_minutes?: number;
+    checkout_url?: string | null;
     download_url?: string | null;
     items?: CheckoutOrderItem[];
 }

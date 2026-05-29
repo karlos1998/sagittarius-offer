@@ -21,7 +21,7 @@
                 </Link>
                 <Link
                     :href="route('cart.index')"
-                    :class="linkClass(route().current('cart.index') || route().current('checkout.index'))"
+                    :class="linkClass(route().current('cart.index') || route().current('checkout.*'))"
                 >
                     Koszyk
                     <span

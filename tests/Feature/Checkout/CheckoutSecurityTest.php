@@ -46,7 +46,7 @@ it('limits checkout email attempts with Polish feedback', function () {
             ->withSession($session)
             ->from(route('checkout.index'))
             ->post(route('checkout.store'), $payload)
-            ->assertRedirect(route('checkout.index'));
+            ->assertRedirect();
     }
 
     $this
@@ -75,8 +75,8 @@ it('limits verification code attempts with Polish feedback', function () {
             ->withSession([
                 'checkout_order_id' => $order->id,
             ])
-            ->from(route('checkout.index'))
-            ->post(route('checkout.verify'), [
+            ->from(route('checkout.show', ['order' => $order->public_id]))
+            ->post(route('checkout.verify', ['order' => $order->public_id]), [
                 'code' => '000000',
             ])
             ->assertSessionHasErrors('code');
@@ -86,11 +86,11 @@ it('limits verification code attempts with Polish feedback', function () {
         ->withSession([
             'checkout_order_id' => $order->id,
         ])
-        ->from(route('checkout.index'))
-        ->post(route('checkout.verify'), [
+        ->from(route('checkout.show', ['order' => $order->public_id]))
+        ->post(route('checkout.verify', ['order' => $order->public_id]), [
             'code' => '000000',
         ])
-        ->assertRedirect(route('checkout.index'))
+        ->assertRedirect(route('checkout.show', ['order' => $order->public_id]))
         ->assertSessionHas('error', 'Za dużo prób. Spróbuj ponownie za chwilę.');
 });
 
@@ -152,12 +152,12 @@ it('rejects verification code submissions when turnstile verification fails', fu
         ->withSession([
             'checkout_order_id' => $order->id,
         ])
-        ->from(route('checkout.index'))
-        ->post(route('checkout.verify'), [
+        ->from(route('checkout.show', ['order' => $order->public_id]))
+        ->post(route('checkout.verify', ['order' => $order->public_id]), [
             'code' => '123456',
             'turnstile_token' => 'invalid-token',
         ])
-        ->assertRedirect(route('checkout.index'))
+        ->assertRedirect(route('checkout.show', ['order' => $order->public_id]))
         ->assertSessionHasErrors('turnstile_token');
 
     expect($order->refresh()->verified_at)->toBeNull();
@@ -188,11 +188,11 @@ it('rejects resend code requests when turnstile verification fails', function ()
         ->withSession([
             'checkout_order_id' => $order->id,
         ])
-        ->from(route('checkout.index'))
-        ->post(route('checkout.resend-code'), [
+        ->from(route('checkout.show', ['order' => $order->public_id]))
+        ->post(route('checkout.resend-code', ['order' => $order->public_id]), [
             'turnstile_token' => 'invalid-token',
         ])
-        ->assertRedirect(route('checkout.index'))
+        ->assertRedirect(route('checkout.show', ['order' => $order->public_id]))
         ->assertSessionHasErrors('turnstile_token');
 
     Mail::assertNotQueued(OrderVerificationCodeMail::class);

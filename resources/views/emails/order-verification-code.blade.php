@@ -35,6 +35,10 @@
                         <p style="margin: 0 0 6px; font-size: 14px; line-height: 1.6; color: #374151;">
                             Kod jest ważny przez <strong>5 minut</strong>.
                         </p>
+                        <p style="margin: 0 0 6px; font-size: 14px; line-height: 1.6; color: #374151;">
+                            Link do zamówienia:
+                            <a href="{{ route('checkout.show', ['order' => $order->public_id]) }}" style="color: #111827;">{{ route('checkout.show', ['order' => $order->public_id]) }}</a>
+                        </p>
                         <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #6b7280;">
                             Jeśli to nie Ty składałeś zamówienie, zignoruj tę wiadomość.
                         </p>

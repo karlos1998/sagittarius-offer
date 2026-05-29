@@ -32,7 +32,7 @@
                 <div class="rounded border border-black/30 bg-white p-6">
                     <h2 class="mb-4 text-xl font-semibold">Podsumowanie</h2>
 
-                    <template v-if="checkoutStep !== 'complete'">
+                    <template v-if="checkoutStep !== 'complete' && !order">
                         <div class="space-y-4">
                             <div v-for="(item, index) in cartItems" :key="index" class="rounded border border-black/20 p-4">
                                 <div class="font-medium">{{ item.gun.name }}</div>
@@ -76,6 +76,20 @@
                             <div class="flex justify-between gap-4">
                                 <span>Status płatności</span>
                                 <span class="text-black">{{ order.payment_status_label }}</span>
+                            </div>
+                        </div>
+
+                        <div v-if="order.items?.length" class="mt-6 space-y-3">
+                            <div v-for="(item, index) in order.items" :key="index" class="rounded border border-black/20 p-4">
+                                <div class="font-medium">{{ item.gun_name }} / {{ item.ammunition_name }}</div>
+                                <div v-if="item.gun_package_name" class="mt-1 text-xs text-black/60">
+                                    Pakiet: {{ item.gun_package_name }}
+                                    <span v-if="item.gun_package_guns_summary">({{ item.gun_package_guns_summary }})</span>
+                                </div>
+                                <div class="mt-2 flex justify-between gap-4 text-sm text-black/70">
+                                    <span>{{ item.quantity }} strzałów</span>
+                                    <span>{{ formatPrice(item.line_total) }} zł</span>
+                                </div>
                             </div>
                         </div>
                     </template>
@@ -260,6 +274,14 @@
                         >
                             Pobierz PDF zamówienia
                         </a>
+
+                        <a
+                            v-if="order.checkout_url"
+                            :href="order.checkout_url"
+                            class="mt-3 inline-flex w-full justify-center rounded border border-black px-5 py-2 text-sm font-medium hover:bg-black hover:text-white"
+                        >
+                            Otwórz link do zamówienia
+                        </a>
                     </template>
                 </div>
             </div>
@@ -365,7 +387,7 @@ const submitOrderLabel = computed(() => {
 });
 
 const totalShots = computed(() => {
-    if (props.checkoutStep === 'complete' && props.order) {
+    if (props.order) {
         return Number(props.order.total_shots ?? 0);
     }
 
@@ -373,7 +395,7 @@ const totalShots = computed(() => {
 });
 
 const totalPrice = computed(() => {
-    if (props.checkoutStep === 'complete' && props.order) {
+    if (props.order) {
         return Number(props.order.total_amount ?? 0);
     }
 
@@ -395,13 +417,21 @@ function submitOrder(): void {
 }
 
 function verifyCode(): void {
-    verifyForm.post(route('checkout.verify'), {
+    if (!props.order) {
+        return;
+    }
+
+    verifyForm.post(route('checkout.verify', props.order.public_id), {
         onFinish: resetVerifyTurnstile,
     });
 }
 
 function resendCode(): void {
-    resendForm.post(route('checkout.resend-code'), {
+    if (!props.order) {
+        return;
+    }
+
+    resendForm.post(route('checkout.resend-code', props.order.public_id), {
         onFinish: resetVerifyTurnstile,
     });
 }
