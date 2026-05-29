@@ -31,8 +31,78 @@ beforeEach(function () {
     });
 });
 
-it('creates order and queues verification code email', function () {
+it('creates confirmed order and sends voucher immediately by default', function () {
     Mail::fake();
+
+    $caliber = Caliber::factory()->create();
+    $ammunition = Ammunition::factory()->for($caliber)->create([
+        'club_price' => 2.50,
+        'standard_price' => 5.00,
+    ]);
+    $gun = Gun::factory()->for($caliber)->create();
+
+    $response = $this
+        ->withSession([
+            'cart' => [
+                $gun->id => [
+                    'gun_id' => $gun->id,
+                    'ammunitions' => [
+                        $ammunition->id => 10,
+                    ],
+                ],
+            ],
+            'is_club_member' => false,
+        ])
+        ->post(route('checkout.store'), [
+            'first_name' => 'Jan',
+            'last_name' => 'Kowalski',
+            'street' => 'Testowa',
+            'house_number' => '1A',
+            'apartment_number' => '12',
+            'postal_code' => '30-001',
+            'city' => 'Kraków',
+            'email' => 'jan@example.com',
+            'payment_method' => OrderPaymentMethod::PayOnSite->value,
+        ]);
+
+    $response
+        ->assertRedirect(route('checkout.index'))
+        ->assertSessionMissing('cart')
+        ->assertSessionMissing('is_club_member');
+
+    $order = Order::query()->first();
+
+    expect($order)->not->toBeNull();
+    expect($order->status)->toBe(OrderStatus::Confirmed);
+    expect($order->payment_status)->toBe(OrderPaymentStatus::Pending);
+    expect((float) $order->total_amount)->toBe(50.0);
+    expect($order->total_shots)->toBe(10);
+    expect($order->verification_code_hash)->toBeNull();
+    expect($order->verification_code_expires_at)->toBeNull();
+    expect($order->verified_at)->not->toBeNull();
+    expect($order->download_token)->not->toBeNull();
+    expect($order->street)->toBe('Testowa');
+    expect($order->house_number)->toBe('1A');
+    expect($order->apartment_number)->toBe('12');
+    expect($order->postal_code)->toBe('30-001');
+    expect($order->city)->toBe('Kraków');
+
+    expect(OrderItem::query()->count())->toBe(1);
+
+    Mail::assertSent(OrderConfirmedMail::class, function (OrderConfirmedMail $mail) use ($order): bool {
+        return $mail->hasTo($order->email)
+            && $mail->order->is($order)
+            && count($mail->attachments()) === 1;
+    });
+    Mail::assertNotQueued(OrderVerificationCodeMail::class);
+});
+
+it('can require email verification before issuing the voucher', function () {
+    Mail::fake();
+
+    config([
+        'checkout.require_voucher_email_verification' => true,
+    ]);
 
     $caliber = Caliber::factory()->create();
     $ammunition = Ammunition::factory()->for($caliber)->create([
@@ -71,24 +141,17 @@ it('creates order and queues verification code email', function () {
 
     expect($order)->not->toBeNull();
     expect($order->status)->toBe(OrderStatus::PendingVerification);
-    expect($order->payment_status)->toBe(OrderPaymentStatus::Pending);
-    expect((float) $order->total_amount)->toBe(50.0);
-    expect($order->total_shots)->toBe(10);
+    expect($order->verified_at)->toBeNull();
+    expect($order->download_token)->toBeNull();
     expect($order->verification_code_hash)->not->toBeNull();
-    expect($order->street)->toBe('Testowa');
-    expect($order->house_number)->toBe('1A');
-    expect($order->apartment_number)->toBe('12');
-    expect($order->postal_code)->toBe('30-001');
-    expect($order->city)->toBe('Kraków');
     expect($order->verification_code_expires_at?->isAfter(now()->addMinutes(4)))->toBeTrue();
-
-    expect(OrderItem::query()->count())->toBe(1);
 
     Mail::assertQueued(OrderVerificationCodeMail::class, function (OrderVerificationCodeMail $mail) use ($order): bool {
         return $mail->hasTo($order->email)
             && $mail->order->is($order)
             && strlen($mail->verificationCode) === 6;
     });
+    Mail::assertNotSent(OrderConfirmedMail::class);
 });
 
 it('stores package details on order items when gun comes from package', function () {

@@ -82,6 +82,11 @@ class CheckoutService
         return $order->verified_at === null ? 'verify' : 'complete';
     }
 
+    public function requiresVoucherEmailVerification(): bool
+    {
+        return (bool) config('checkout.require_voucher_email_verification');
+    }
+
     /**
      * @return array<int, array{value: string, label: string}>
      */
@@ -119,7 +124,8 @@ class CheckoutService
             ];
         }
 
-        $verificationCode = $this->generateVerificationCode();
+        $requiresVoucherEmailVerification = $this->requiresVoucherEmailVerification();
+        $verificationCode = $requiresVoucherEmailVerification ? $this->generateVerificationCode() : null;
 
         $order = DB::transaction(function () use ($request, $preparedItems, $verificationCode, $isClubMember): Order {
             $order = Order::query()->create([
@@ -138,8 +144,8 @@ class CheckoutService
                 'is_club_member' => $isClubMember,
                 'total_shots' => $preparedItems['total_shots'],
                 'total_amount' => $preparedItems['total_amount'],
-                'verification_code_hash' => Hash::make($verificationCode),
-                'verification_code_expires_at' => now()->addMinutes(self::CODE_EXPIRATION_MINUTES),
+                'verification_code_hash' => $verificationCode ? Hash::make($verificationCode) : null,
+                'verification_code_expires_at' => $verificationCode ? now()->addMinutes(self::CODE_EXPIRATION_MINUTES) : null,
             ]);
 
             $order->items()->createMany($preparedItems['items']);
@@ -147,7 +153,9 @@ class CheckoutService
             return $order;
         });
 
-        Mail::to($order->email)->queue(new OrderVerificationCodeMail($order, $verificationCode));
+        if ($verificationCode) {
+            Mail::to($order->email)->queue(new OrderVerificationCodeMail($order, $verificationCode));
+        }
 
         $request->session()->put('checkout_order_id', $order->id);
 

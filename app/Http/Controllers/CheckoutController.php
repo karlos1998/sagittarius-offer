@@ -37,6 +37,7 @@ class CheckoutController extends Controller
             'guns' => $cartData['guns'],
             'isClubMember' => $this->checkoutService->isClubMember(),
             'checkoutStep' => $this->checkoutService->determineCheckoutStep($order),
+            'requiresVoucherEmailVerification' => $this->checkoutService->requiresVoucherEmailVerification(),
             'paymentMethods' => $this->checkoutService->paymentMethodsForFrontend(),
             'order' => $order ? $this->checkoutService->mapOrderForFrontend($order) : null,
             'turnstile' => $this->turnstileService->configurationForFrontend(),
@@ -55,6 +56,14 @@ class CheckoutController extends Controller
 
         if ($result['status'] === CheckoutService::CREATE_STATUS_ITEMS_INVALID) {
             return back()->with('error', 'Nie udało się przygotować pozycji zamówienia.');
+        }
+
+        if (! $this->checkoutService->requiresVoucherEmailVerification() && $result['order'] instanceof Order) {
+            $this->checkoutService->confirmOrder($result['order']);
+
+            return redirect()
+                ->route('checkout.index')
+                ->with('success', 'Voucher jest gotowy. Możesz pobrać PDF poniżej.');
         }
 
         return redirect()

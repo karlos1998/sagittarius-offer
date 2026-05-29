@@ -32,6 +32,10 @@ beforeEach(function () {
 it('limits checkout email attempts with Polish feedback', function () {
     Mail::fake();
 
+    config([
+        'checkout.require_voucher_email_verification' => true,
+    ]);
+
     $session = checkoutSecurityCartSession();
     $payload = checkoutSecurityPayload([
         'email' => 'limit@example.com',

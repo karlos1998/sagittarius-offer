@@ -175,7 +175,7 @@
                                 :disabled="isDetailsSubmitDisabled"
                                 class="w-full rounded border border-black bg-black px-5 py-2 text-sm font-medium text-white hover:bg-white hover:text-black disabled:opacity-60"
                             >
-                                {{ detailsForm.processing ? 'Zapisywanie...' : 'Zapisz i wyślij kod' }}
+                                {{ submitOrderLabel }}
                             </button>
                         </form>
                     </template>
@@ -285,6 +285,7 @@ const props = withDefaults(
         guns?: Gun[];
         isClubMember?: boolean;
         checkoutStep?: CheckoutStep;
+        requiresVoucherEmailVerification?: boolean;
         paymentMethods?: PaymentMethodOption[];
         order?: CheckoutOrder | null;
         turnstile?: TurnstileConfig;
@@ -294,6 +295,7 @@ const props = withDefaults(
         guns: () => [],
         isClubMember: false,
         checkoutStep: 'details',
+        requiresVoucherEmailVerification: false,
         paymentMethods: () => [],
         order: null,
         turnstile: () => ({
@@ -341,10 +343,10 @@ const stepLabel = computed(() => {
     }
 
     if (props.checkoutStep === 'complete') {
-        return '3/3 - Gotowe';
+        return props.requiresVoucherEmailVerification ? '3/3 - Gotowe' : '2/2 - Gotowe';
     }
 
-    return '1/3 - Dane zamawiającego';
+    return props.requiresVoucherEmailVerification ? '1/3 - Dane zamawiającego' : '1/2 - Dane zamawiającego';
 });
 
 const cartItems = computed(() => buildCartDisplayItems(props.cart, props.guns, props.isClubMember));
@@ -354,6 +356,13 @@ const isDetailsSubmitDisabled = computed(() => detailsForm.processing || (isTurn
 const isVerifySubmitDisabled = computed(() => verifyForm.processing || (isTurnstileEnabled.value && !verifyForm.turnstile_token));
 const isResendSubmitDisabled = computed(() => resendForm.processing || (isTurnstileEnabled.value && !resendForm.turnstile_token));
 const verificationTurnstileError = computed(() => verifyForm.errors.turnstile_token || resendForm.errors.turnstile_token);
+const submitOrderLabel = computed(() => {
+    if (detailsForm.processing) {
+        return 'Zapisywanie...';
+    }
+
+    return props.requiresVoucherEmailVerification ? 'Zapisz i wyślij kod' : 'Zapisz i pobierz voucher';
+});
 
 const totalShots = computed(() => {
     if (props.checkoutStep === 'complete' && props.order) {
