@@ -16,10 +16,8 @@ class AuthenticateAssortment
         $body = $request->isJson() ? $request->json()->all() : $request->request->all();
         $email = $body['email'] ?? null;
         $password = $body['password'] ?? null;
-        $allowedEmail = config('assortment.email');
 
-        if (! is_string($email) || ! is_string($password) || ! is_string($allowedEmail)
-            || $allowedEmail === '' || $email !== $allowedEmail) {
+        if (! is_string($email) || ! is_string($password) || $email === '' || $password === '') {
             return response()->json(['message' => 'Nieprawidłowy email lub hasło.'], 401);
         }
 

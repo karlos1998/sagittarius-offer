@@ -9,7 +9,6 @@ beforeEach(function (): void {
     Storage::fake('public');
     config(['filesystems.media_disk' => 'public']);
     $user = User::factory()->create();
-    config(['assortment.email' => $user->email]);
     $this->credentials = ['email' => $user->email, 'password' => 'password'];
     $this->gun = Gun::factory()->create(['photos' => null]);
     $this->endpoint = '/api/assortment/guns/'.$this->gun->id.'/photos';

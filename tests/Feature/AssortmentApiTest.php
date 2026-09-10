@@ -9,7 +9,6 @@ use App\Models\User;
 
 beforeEach(function (): void {
     $this->admin = User::factory()->create();
-    config(['assortment.email' => $this->admin->email]);
     $this->credentials = ['email' => $this->admin->email, 'password' => 'password'];
     $this->gunRow = ['name' => 'Test gun', 'gun_type' => 'Pistol', 'caliber' => '9 mm'];
 });
@@ -21,11 +20,16 @@ it('requires valid credentials for both endpoints', function (string $endpoint):
     $this->postJson($endpoint.'?'.http_build_query($this->credentials))->assertUnauthorized();
 })->with(['/api/assortment', '/api/assortment/import']);
 
-it('rejects other registered users and disabled access', function (): void {
+it('allows any existing user with valid credentials to read and import', function (): void {
     $other = User::factory()->create();
-    $this->postJson('/api/assortment', ['email' => $other->email, 'password' => 'password'])->assertUnauthorized();
-    config(['assortment.email' => null]);
-    $this->postJson('/api/assortment', $this->credentials)->assertUnauthorized();
+    $credentials = ['email' => $other->email, 'password' => 'password'];
+    $this->postJson('/api/assortment', $credentials)->assertOk();
+    $this->postJson('/api/assortment/import', [...$credentials, 'guns' => [$this->gunRow]])->assertOk();
+    $this->postJson('/api/assortment', $this->credentials)->assertOk();
+});
+
+it('rejects unknown users', function (): void {
+    $this->postJson('/api/assortment', ['email' => 'missing@example.com', 'password' => 'password'])->assertUnauthorized();
 });
 
 it('lists the current assortment with IDs and relationships', function (): void {
