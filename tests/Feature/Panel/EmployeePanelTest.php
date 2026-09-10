@@ -6,7 +6,7 @@ use App\Models\User;
 
 it('redirects guests from the employee panel to login', function () {
     $this->get(route('panel.index'))
-        ->assertRedirect(route('login'));
+        ->assertRedirect(route('filament.admin.auth.login'));
 });
 
 it('shows latest orders first in the employee panel', function () {

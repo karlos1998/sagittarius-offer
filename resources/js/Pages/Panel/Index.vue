@@ -195,6 +195,7 @@
 </template>
 
 <script setup lang="ts">
+import axios from 'axios';
 import { computed, onUnmounted, ref, watch } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
@@ -284,8 +285,9 @@ function completeSelectedOrder(): void {
     });
 }
 
-function logout(): void {
-    router.post(route('logout'));
+async function logout(): Promise<void> {
+    await axios.post(route('filament.admin.auth.logout'));
+    window.location.assign(route('filament.admin.auth.login'));
 }
 
 function formatCurrency(value: number | string): string {

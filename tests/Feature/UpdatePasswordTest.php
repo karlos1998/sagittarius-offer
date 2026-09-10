@@ -3,19 +3,19 @@
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
-test('password can be updated', function () {
+test('password cannot be updated through the removed starter endpoint', function () {
     $this->actingAs($user = User::factory()->create());
 
     $this->put('/user/password', [
         'current_password' => 'password',
         'password' => 'new-password',
         'password_confirmation' => 'new-password',
-    ]);
+    ])->assertNotFound();
 
-    expect(Hash::check('new-password', $user->fresh()->password))->toBeTrue();
+    expect(Hash::check('password', $user->fresh()->password))->toBeTrue();
 });
 
-test('current password must be correct', function () {
+test('removed password endpoint rejects an incorrect current password', function () {
     $this->actingAs($user = User::factory()->create());
 
     $response = $this->put('/user/password', [
@@ -24,12 +24,12 @@ test('current password must be correct', function () {
         'password_confirmation' => 'new-password',
     ]);
 
-    $response->assertSessionHasErrors();
+    $response->assertNotFound();
 
     expect(Hash::check('password', $user->fresh()->password))->toBeTrue();
 });
 
-test('new passwords must match', function () {
+test('removed password endpoint rejects mismatched passwords', function () {
     $this->actingAs($user = User::factory()->create());
 
     $response = $this->put('/user/password', [
@@ -38,7 +38,7 @@ test('new passwords must match', function () {
         'password_confirmation' => 'wrong-password',
     ]);
 
-    $response->assertSessionHasErrors();
+    $response->assertNotFound();
 
     expect(Hash::check('password', $user->fresh()->password))->toBeTrue();
 });
