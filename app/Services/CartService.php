@@ -43,7 +43,7 @@ class CartService
             ->all();
         $gunPackages = empty($packageIds)
             ? collect()
-            : GunPackage::query()
+            : GunPackage::query()->available()
                 ->with([
                     'packageGuns' => fn ($query) => $query->with([
                         'gun.gunType',
@@ -53,6 +53,10 @@ class CartService
                 ])
                 ->whereIn('id', $packageIds)
                 ->get();
+
+        $cart = array_filter($cart, fn (array $item): bool => $guns->contains('id', $item['gun_id'])
+            && (empty($item['package_id']) || $gunPackages->contains('id', $item['package_id'])));
+        session()->put('cart', $cart);
 
         return [
             'cart' => $cart,
@@ -91,7 +95,7 @@ class CartService
 
     public function addPackage(int $packageId): void
     {
-        $package = GunPackage::query()
+        $package = GunPackage::query()->available()
             ->with([
                 'packageGuns' => fn ($query) => $query
                     ->with([

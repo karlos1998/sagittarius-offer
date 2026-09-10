@@ -15,6 +15,21 @@ use Illuminate\Support\Arr;
 
 class AssortmentController extends Controller
 {
+    public function deleteGun(Gun $gun): JsonResponse
+    {
+        $gun->delete();
+
+        return response()->json(['id' => $gun->id, 'deleted_at' => $gun->deleted_at]);
+    }
+
+    public function restoreGun(string $gun): JsonResponse
+    {
+        $record = Gun::withTrashed()->findOrFail($gun);
+        $record->restore();
+
+        return response()->json(['id' => $record->id, 'deleted_at' => null]);
+    }
+
     public function uploadPhotos(UploadGunPhotosRequest $request, Gun $gun, GunPhotoService $service): JsonResponse
     {
         $gun = $service->upload($gun, $request->getPhotos(), $request->replacesPhotos());

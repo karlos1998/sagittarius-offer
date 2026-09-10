@@ -41,12 +41,12 @@ class OrderItem extends Model
 
     public function gun(): BelongsTo
     {
-        return $this->belongsTo(Gun::class);
+        return $this->belongsTo(Gun::class)->withTrashed();
     }
 
     public function ammunition(): BelongsTo
     {
-        return $this->belongsTo(Ammunition::class);
+        return $this->belongsTo(Ammunition::class)->withTrashed();
     }
 
     public function gunPackage(): BelongsTo

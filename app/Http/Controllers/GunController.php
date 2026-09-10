@@ -19,7 +19,7 @@ class GunController extends Controller
         $gunTypes = GunType::all();
         $gunPackages = GunPackageResource::collection(
             GunPackage::query()
-                ->where('is_active', true)
+                ->available()
                 ->with([
                     'packageGuns' => fn ($query) => $query->with([
                         'gun.gunType',

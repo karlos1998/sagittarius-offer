@@ -6,9 +6,14 @@ use App\Models\Instructor;
 use App\Models\User;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
 beforeEach(function () {
+    config(['filesystems.media_disk' => 'public']);
+    Storage::fake('public');
+    Storage::disk('public')->put('instructors/anna-nowak.jpg', 'existing photo');
+    Storage::disk('public')->put('instructors/piotr-nowy.jpg', 'existing photo');
     $user = User::factory()->create();
 
     $user = new class($user->getAttributes()) extends User implements FilamentUser
@@ -31,7 +36,7 @@ it('creates an instructor from the filament resource form', function () {
             'description' => 'Specjalistka od szkoleń dla początkujących.',
             'sort_order' => 3,
             'is_active' => true,
-            'photo' => 'instructors/anna-nowak.jpg',
+            'photo' => ['instructors/anna-nowak.jpg'],
         ])
         ->call('create')
         ->assertHasNoFormErrors()
@@ -61,7 +66,7 @@ it('updates an instructor from the filament resource form', function () {
             'description' => 'Nowy opis instruktora.',
             'sort_order' => 1,
             'is_active' => false,
-            'photo' => 'instructors/piotr-nowy.jpg',
+            'photo' => ['instructors/piotr-nowy.jpg'],
         ])
         ->call('save')
         ->assertHasNoFormErrors()
