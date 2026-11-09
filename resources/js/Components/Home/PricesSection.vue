@@ -22,7 +22,14 @@
                 </Link>
             </div>
 
-            <div class="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            <img
+                src="/images/range/gun-wall.jpg"
+                alt="Ściana z pistoletami i karabinami na podświetlanych półkach"
+                class="mt-10 h-56 w-full rounded-3xl object-cover sm:h-80"
+                loading="lazy"
+            >
+
+            <div class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
                 <article
                     v-for="highlight in highlights"
                     :key="highlight.gun_type"

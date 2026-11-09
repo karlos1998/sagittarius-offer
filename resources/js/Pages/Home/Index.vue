@@ -6,6 +6,7 @@
         <PathsSection :permit-help-url="location.permit_help_url" />
         <FirstVisitSection />
         <PricesSection :highlights="priceHighlights" />
+        <GallerySection />
         <InstructorsSection :instructors="instructors" />
         <KidsSection />
         <FaqSection :permit-help-url="location.permit_help_url" />
@@ -20,6 +21,7 @@ import Footer from '../../Components/Common/Footer.vue';
 import SimpleNavbar from '../../Components/Common/SimpleNavbar.vue';
 import FaqSection from '../../Components/Home/FaqSection.vue';
 import FirstVisitSection from '../../Components/Home/FirstVisitSection.vue';
+import GallerySection from '../../Components/Home/GallerySection.vue';
 import InstructorsSection from '../../Components/Home/InstructorsSection.vue';
 import KidsSection from '../../Components/Home/KidsSection.vue';
 import PathsSection from '../../Components/Home/PathsSection.vue';

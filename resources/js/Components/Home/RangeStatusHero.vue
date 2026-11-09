@@ -96,17 +96,7 @@
                 </div>
             </div>
 
-            <div class="relative hidden min-h-[520px] overflow-hidden rounded-3xl bg-stone-200 lg:block">
-                <img
-                    src="/images/range/teen-shooter-rifle.jpg"
-                    alt="Młody strzelec z karabinkiem na stanowisku strzelnicy Sagittarius"
-                    class="absolute inset-0 h-full w-full object-cover"
-                >
-                <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-6 pt-24 text-white">
-                    <p class="text-sm font-semibold">Strzelnica Forty · Piątnica</p>
-                    <p class="mt-1 text-sm text-white/80">Pistolety, karabiny, strzelby i rewolwery na miejscu.</p>
-                </div>
-            </div>
+            <RangeVideo />
         </div>
     </section>
 </template>
@@ -114,6 +104,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { Link } from '@inertiajs/vue3';
+import RangeVideo from './RangeVideo.vue';
 import type { RangeLocation, RangeScheduleData } from '@/types/storefront';
 import {
     addDaysToDateString,

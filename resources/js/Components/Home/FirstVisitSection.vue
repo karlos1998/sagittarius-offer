@@ -3,8 +3,8 @@
         <div class="mx-auto grid w-full max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:px-8">
             <div class="overflow-hidden rounded-3xl bg-stone-200">
                 <img
-                    src="/images/range/pistol-lane.jpg"
-                    alt="Stanowisko pistoletowe z magazynkami i amunicją, w tle tarcza"
+                    src="/images/range/pistol-shooter.jpg"
+                    alt="Strzelec w słuchawkach oddaje strzał z pistoletu na osi strzelnicy"
                     class="h-72 w-full object-cover sm:h-96 lg:h-[560px]"
                     loading="lazy"
                 >
