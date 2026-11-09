@@ -167,6 +167,15 @@ const nextOpenPhrase = computed(() => {
     return `${relativeDayPhrase(day, tomorrowDate.value)} od ${formatTime(day.opens_at, props.schedule.timezone)}`;
 });
 
+const nextOpenDayName = computed(() => {
+    const day = status.value.nextOpenDay;
+
+    return day ? relativeDayPhrase(day, tomorrowDate.value) : null;
+});
+
+const nextOpenTime = computed(() => formatTime(status.value.nextOpenDay?.opens_at ?? null, props.schedule.timezone));
+const nextCloseTime = computed(() => formatTime(status.value.nextOpenDay?.closes_at ?? null, props.schedule.timezone));
+
 const closeTime = computed(() => formatTime(status.value.today?.closes_at ?? null, props.schedule.timezone));
 const openTime = computed(() => formatTime(status.value.today?.opens_at ?? null, props.schedule.timezone));
 
@@ -179,11 +188,11 @@ const badgeText = computed(() => {
         return `Dziś otwieramy o ${openTime.value}`;
     }
 
-    if (status.value.today?.closure_reason) {
-        return `Dziś nieczynne: ${status.value.today.closure_reason}`;
+    if (nextOpenDayName.value) {
+        return `Otwieramy ${nextOpenDayName.value} o ${nextOpenTime.value}`;
     }
 
-    return 'Dziś już zamknięte';
+    return 'Chwilowo nieczynne';
 });
 
 const headline = computed(() => {
@@ -197,8 +206,8 @@ const headline = computed(() => {
         return `Dziś strzelamy od ${openTime.value} do ${closeTime.value}. Przyjedź.`;
     }
 
-    if (nextOpenPhrase.value) {
-        return `Na dziś koniec. Czekamy na ciebie ${nextOpenPhrase.value}.`;
+    if (nextOpenDayName.value) {
+        return `Wpadnij ${nextOpenDayName.value}. Strzelamy od ${nextOpenTime.value} do ${nextCloseTime.value}.`;
     }
 
     return 'Strzelnica jest chwilowo nieczynna.';
@@ -217,6 +226,10 @@ const countdownText = computed(() => {
         return `Otwieramy za ${formatDuration(status.value.minutesUntilOpen)}.`;
     }
 
+    if (status.value.today?.closure_reason) {
+        return `Dziś nieczynne: ${status.value.today.closure_reason}.`;
+    }
+
     return null;
 });
 
@@ -227,11 +240,7 @@ const badgeClass = computed(() => {
             : 'border-emerald-300 bg-emerald-50 text-emerald-900';
     }
 
-    if (status.value.state === 'opens_later_today') {
-        return 'border-amber-300 bg-amber-50 text-amber-900';
-    }
-
-    return 'border-black/15 bg-stone-100 text-black/70';
+    return 'border-amber-300 bg-amber-50 text-amber-900';
 });
 
 const dotClass = computed(() => {
@@ -239,6 +248,6 @@ const dotClass = computed(() => {
         return isClosingSoon(status.value) ? 'bg-amber-500' : 'bg-emerald-500';
     }
 
-    return status.value.state === 'opens_later_today' ? 'bg-amber-500' : 'bg-black/40';
+    return 'bg-amber-500';
 });
 </script>
