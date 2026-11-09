@@ -1,56 +1,42 @@
 <template>
-    <div class="mb-8">
-        <div class="rounded border border-black/30 bg-white p-4">
-            <div class="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-                <div class="flex items-center text-black/80">
-                    <svg class="mr-2 h-5 w-5 text-black/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                    </svg>
-                    <span class="text-sm font-medium">Filtruj broń:</span>
-                </div>
-
-                <div class="flex flex-wrap gap-2">
-                    <button
-                        @click="selectedType = null"
-                        :class="[
-                            'rounded border px-3 py-1.5 text-sm font-medium transition-colors',
-                            !selectedType
-                                ? 'border-black bg-black text-white'
-                                : 'border-black/40 bg-white text-black hover:bg-black hover:text-white'
-                        ]"
-                    >
-                        Wszystkie
-                    </button>
-
-                    <button
-                        v-for="type in gunTypes"
-                        :key="type.id"
-                        @click="selectedType = type.id"
-                        :class="[
-                            'rounded border px-3 py-1.5 text-sm font-medium transition-colors',
-                            selectedType === type.id
-                                ? 'border-black bg-black text-white'
-                                : 'border-black/40 bg-white text-black hover:bg-black hover:text-white'
-                        ]"
-                    >
-                        {{ type.name }}
-                    </button>
-                </div>
+    <div class="sticky top-14 z-30 -mx-4 mb-8 border-b border-black/10 bg-white/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+        <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div class="-mx-1 flex gap-2 overflow-x-auto px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <button
+                    v-for="option in typeOptions"
+                    :key="option.id ?? 'all'"
+                    type="button"
+                    :class="[
+                        'shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors',
+                        selectedType === option.id
+                            ? 'border-black bg-black text-white'
+                            : 'border-black/15 bg-white text-black hover:border-black',
+                    ]"
+                    @click="selectedType = option.id"
+                >
+                    {{ option.name }}
+                    <span :class="selectedType === option.id ? 'text-white/60' : 'text-black/40'">{{ option.count }}</span>
+                </button>
             </div>
 
-            <div v-if="selectedType" class="mt-4 border-t border-black/20 pt-4">
-                <div class="flex items-center text-sm text-black/70">
-                    <span>Aktywny filtr:</span>
-                    <span class="ml-2 rounded border border-black/30 px-2 py-1 text-xs font-medium text-black">
-                        {{ getSelectedTypeName() }}
-                    </span>
+            <div class="flex items-center gap-3">
+                <span class="text-sm text-black/60">Ceny dla:</span>
+                <div class="inline-flex rounded-full border border-black/15 bg-stone-100 p-1 text-sm font-medium">
                     <button
-                        @click="selectedType = null"
-                        class="ml-2 text-black/60 transition-colors hover:text-black"
+                        type="button"
+                        :aria-pressed="!isClubMember"
+                        :class="['rounded-full px-3 py-1 transition-colors', !isClubMember ? 'bg-white text-black shadow-sm' : 'text-black/60 hover:text-black']"
+                        @click="setClubMember(false)"
                     >
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                        Gościa
+                    </button>
+                    <button
+                        type="button"
+                        :aria-pressed="isClubMember"
+                        :class="['rounded-full px-3 py-1 transition-colors', isClubMember ? 'bg-amber-300 text-black shadow-sm' : 'text-black/60 hover:text-black']"
+                        @click="setClubMember(true)"
+                    >
+                        Klubowicza
                     </button>
                 </div>
             </div>
@@ -60,21 +46,26 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { GunType } from '@/types/storefront';
+import type { Gun, GunType } from '@/types/storefront';
 
 const props = withDefaults(
     defineProps<{
         gunTypes?: GunType[];
+        guns?: Gun[];
         modelValue?: number | null;
+        isClubMember?: boolean;
     }>(),
     {
         gunTypes: () => [],
+        guns: () => [],
         modelValue: null,
+        isClubMember: false,
     }
 );
 
 const emit = defineEmits<{
     (event: 'update:modelValue', value: number | null): void;
+    (event: 'update:isClubMember', value: boolean): void;
 }>();
 
 const selectedType = computed({
@@ -82,8 +73,20 @@ const selectedType = computed({
     set: (value: number | null) => emit('update:modelValue', value),
 });
 
-function getSelectedTypeName(): string {
-    const type = props.gunTypes.find((item) => item.id === props.modelValue);
-    return type ? type.name : '';
+const typeOptions = computed(() => [
+    { id: null, name: 'Wszystkie', count: props.guns.length },
+    ...props.gunTypes
+        .map((type) => ({
+            id: type.id as number | null,
+            name: type.name,
+            count: props.guns.filter((gun) => gun.gun_type_id === type.id).length,
+        }))
+        .filter((option) => option.count > 0),
+]);
+
+function setClubMember(value: boolean): void {
+    if (value !== props.isClubMember) {
+        emit('update:isClubMember', value);
+    }
 }
 </script>

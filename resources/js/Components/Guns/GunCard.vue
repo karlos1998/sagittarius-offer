@@ -1,121 +1,132 @@
 <template>
-    <div
-        class="overflow-hidden rounded border border-black/30 bg-white transition-colors hover:border-black">
+    <article class="flex flex-col overflow-hidden rounded-3xl border border-black/10 bg-white transition-shadow hover:shadow-[0_12px_30px_rgba(0,0,0,0.08)]">
         <ExpandableGunPhoto :src="previewPhoto" :alt="gun.name" />
 
-        <!-- Gun Info -->
-        <div class="p-6">
-            <h3 class="mb-2 text-xl font-semibold">{{ gun.name }}</h3>
-
-            <div class="mb-4 space-y-2">
-                <div class="flex items-center text-black/70">
-                    <svg class="mr-2 h-4 w-4 text-black/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m-9 0h10m-9 0V1m10 3V1m0 3l1 1v16a2 2 0 01-2 2H6a2 2 0 01-2-2V8l1-1z" />
-                    </svg>
-                    <span class="text-sm">{{ gun.gun_type?.name || 'Nieznany typ' }}</span>
-                </div>
-
-                <div class="flex items-center text-black/70">
-                    <svg class="mr-2 h-4 w-4 text-black/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span class="text-sm">Kaliber: {{ gun.caliber?.name || 'Nieznany' }}</span>
-                </div>
+        <div class="flex flex-1 flex-col p-6">
+            <div class="flex flex-wrap gap-2 text-xs font-medium">
+                <span class="rounded-full bg-stone-100 px-2.5 py-1 text-black/70">{{ gun.gun_type?.name || 'Broń' }}</span>
+                <span v-if="gun.caliber?.name" class="rounded-full bg-stone-100 px-2.5 py-1 text-black/70">{{ gun.caliber.name }}</span>
             </div>
 
-            <!-- Ammunition Section -->
-            <div v-if="gun.caliber?.ammunitions && gun.caliber.ammunitions.length > 0" class="mb-4">
-                <h4 class="mb-2 flex items-center text-sm font-medium text-black/70">
-                    <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
-                    </svg>
-                    Dostępna amunicja
-                </h4>
-                <div class="space-y-1">
-                    <div
-                        v-for="ammo in gun.caliber.ammunitions"
-                        :key="ammo.id"
-                        class="flex items-start justify-between gap-3 rounded border border-black/20 px-2 py-1.5 text-sm text-black/80 sm:items-center"
-                    >
-                        <span class="min-w-0 font-medium leading-snug">{{ ammo.name }}</span>
-                        <div class="flex shrink-0 items-center gap-1 text-[11px] sm:text-xs">
-                            <span
-                                class="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 font-semibold text-emerald-700"
-                            >
-                                <span>{{ formatCurrencyPLN(ammo.club_price) }}</span>
-                                <span class="font-medium text-emerald-700/80">(klub)</span>
-                            </span>
-                            <span class="text-black/20">/</span>
-                            <span
-                                class="inline-flex items-center gap-1 rounded-full border border-black/10 bg-black/[0.04] px-2 py-0.5 text-black/70"
-                            >
-                                <span>{{ formatCurrencyPLN(ammo.standard_price) }}</span>
-                                <span class="text-black/50">(standard)</span>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <h3 class="mt-3 text-xl font-semibold text-black">{{ gun.name }}</h3>
 
-            <div v-if="gun.description" class="text-sm text-black/70">
-                {{ gun.description }}
-            </div>
-        </div>
-
-        <!-- Add to Cart Button -->
-        <div class="px-6 pb-6">
-            <button
-                @click="addToCart"
-                :disabled="isInCart"
-                class="w-full rounded border border-black bg-black px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white hover:text-black disabled:cursor-not-allowed disabled:border-black/30 disabled:bg-black/20 disabled:text-black/50"
+            <p
+                v-if="gun.description"
+                class="mt-2 text-sm leading-6 text-black/60"
+                :class="{ 'line-clamp-3': !isDescriptionExpanded }"
             >
-                <span v-if="isInCart" class="flex items-center justify-center">
-                    <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    W koszyku
-                </span>
-                <span v-else class="flex items-center justify-center">
-                    <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2 8h12l-2-8M7 13v8a2 2 0 002 2h6a2 2 0 002-2v-3" />
-                    </svg>
-                    {{ addToCartShotsLabel }}
-                </span>
+                {{ gun.description }}
+            </p>
+            <button
+                v-if="gun.description && gun.description.length > 140"
+                type="button"
+                class="mt-1 w-fit text-xs font-semibold text-black/60 underline underline-offset-2 hover:text-black"
+                @click="isDescriptionExpanded = !isDescriptionExpanded"
+            >
+                {{ isDescriptionExpanded ? 'Zwiń' : 'Więcej' }}
             </button>
+
+            <ul v-if="ammunitions.length" class="mt-5 flex flex-col gap-2">
+                <li
+                    v-for="ammo in ammunitions"
+                    :key="ammo.id"
+                    class="flex items-center justify-between gap-3 rounded-2xl bg-stone-50 px-4 py-3"
+                >
+                    <div class="min-w-0">
+                        <p class="truncate text-sm font-medium text-black">{{ ammo.name }}</p>
+                        <p class="text-xs text-black/50">
+                            {{ formatPerShot(ammo.selectedPrice) }} za strzał
+                            <template v-if="!isClubMember"> · klubowicze {{ formatPerShot(ammo.clubPrice) }}</template>
+                        </p>
+                    </div>
+                    <p class="shrink-0 text-right">
+                        <span class="block text-lg font-semibold leading-tight text-black">{{ formatTotal(ammo.selectedPrice * ammo.step) }}</span>
+                        <span class="text-xs text-black/50">za {{ ammo.step }} {{ shotsWord(ammo.step) }}</span>
+                    </p>
+                </li>
+            </ul>
+
+            <div class="mt-auto pt-6">
+                <button
+                    type="button"
+                    :disabled="isInCart"
+                    class="flex w-full items-center justify-center gap-2 rounded-full border border-black bg-black px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white hover:text-black disabled:cursor-default disabled:border-emerald-300 disabled:bg-emerald-50 disabled:text-emerald-800"
+                    @click="addToCart"
+                >
+                    <svg v-if="isInCart" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    {{ isInCart ? 'W koszyku' : addToCartLabel }}
+                </button>
+            </div>
         </div>
-    </div>
+    </article>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import type { CartMap, Gun } from '@/types/storefront';
-import { formatCurrencyPLN } from '@/utils/format';
+import { toNumber } from '@/utils/format';
+import { pluralPl } from '@/utils/schedule';
 import ExpandableGunPhoto from './ExpandableGunPhoto.vue';
 
 const props = withDefaults(
     defineProps<{
         gun: Gun;
         cart?: CartMap;
+        isClubMember?: boolean;
     }>(),
     {
         cart: () => ({}),
+        isClubMember: false,
     }
 );
 
 const emit = defineEmits(['add-to-cart']);
 
-const isInCart = computed(() => {
-    return props.cart && props.cart[String(props.gun.id)] !== undefined;
-});
+const isDescriptionExpanded = ref(false);
 
-const addToCartShotsLabel = computed(() => {
-    const firstAmmunition = props.gun.caliber?.ammunitions?.[0];
-    const quantityStep = Math.max(Number(firstAmmunition?.cart_quantity_step ?? 10), 1);
+const isInCart = computed(() => props.cart?.[String(props.gun.id)] !== undefined);
 
-    return `Dodaj do koszyka (${quantityStep} strzałów)`;
+const ammunitions = computed(() =>
+    (props.gun.caliber?.ammunitions ?? []).map((ammo) => {
+        const clubPrice = toNumber(ammo.club_price);
+        const standardPrice = toNumber(ammo.standard_price);
+
+        return {
+            id: ammo.id,
+            name: ammo.name,
+            step: Math.max(Number(ammo.cart_quantity_step ?? 10), 1),
+            clubPrice,
+            selectedPrice: props.isClubMember ? clubPrice : standardPrice,
+        };
+    })
+);
+
+const addToCartLabel = computed(() => {
+    const step = ammunitions.value[0]?.step ?? 10;
+
+    return `Dodaj ${step} ${shotsWord(step)} do koszyka`;
 });
 
 const previewPhoto = computed(() => props.gun.photo_urls?.[0] || props.gun.photos?.[0] || null);
+
+function shotsWord(count: number): string {
+    return pluralPl(count, 'strzał', 'strzały', 'strzałów');
+}
+
+function formatPerShot(value: number): string {
+    return new Intl.NumberFormat('pl-PL', { style: 'currency', currency: 'PLN', minimumFractionDigits: 2 }).format(value);
+}
+
+function formatTotal(value: number): string {
+    return new Intl.NumberFormat('pl-PL', {
+        style: 'currency',
+        currency: 'PLN',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+    }).format(value);
+}
 
 function addToCart(): void {
     if (!isInCart.value) {
