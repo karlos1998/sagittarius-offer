@@ -167,6 +167,46 @@ const nextOpenDayName = computed(() => {
 const nextOpenTime = computed(() => formatTime(status.value.nextOpenDay?.opens_at ?? null, props.schedule.timezone));
 const nextCloseTime = computed(() => formatTime(status.value.nextOpenDay?.closes_at ?? null, props.schedule.timezone));
 
+const upcomingClosures = computed(() => {
+    const nextOpenDate = status.value.nextOpenDay?.date ?? null;
+
+    return props.schedule.days.filter((day) => day.date >= todayDate.value
+        && (nextOpenDate === null || day.date < nextOpenDate)
+        && !day.is_open
+        && day.closure_reason);
+});
+
+const closureNote = computed(() => {
+    const closures = upcomingClosures.value;
+
+    if (!closures.length) {
+        return null;
+    }
+
+    const label = (date: string, weekdayPhrase: string): string => {
+        if (date === todayDate.value) {
+            return 'dziś';
+        }
+
+        return date === tomorrowDate.value ? 'jutro' : weekdayPhrase;
+    };
+
+    const labelled = closures.map((day) => ({
+        label: label(day.date, relativeDayPhrase(day, tomorrowDate.value)),
+        reason: day.closure_reason,
+    }));
+
+    if (labelled.length === 1) {
+        const [{ label: dayName, reason }] = labelled;
+
+        return `${dayName.charAt(0).toUpperCase()}${dayName.slice(1)} nieczynne: ${reason}.`;
+    }
+
+    const parts = labelled.map(({ label: dayName, reason }) => `${dayName} (${reason})`);
+
+    return `Nieczynne: ${parts.slice(0, -1).join(', ')} i ${parts[parts.length - 1]}.`;
+});
+
 const closeTime = computed(() => formatTime(status.value.today?.closes_at ?? null, props.schedule.timezone));
 const openTime = computed(() => formatTime(status.value.today?.opens_at ?? null, props.schedule.timezone));
 
@@ -189,7 +229,7 @@ const badgeText = computed(() => {
 const headline = computed(() => {
     if (status.value.state === 'open') {
         return isClosingSoon(status.value)
-            ? 'Zdążysz jeszcze dziś. A jak nie, wpadaj jutro.'
+            ? `Zdążysz jeszcze dziś. A jak nie, wpadaj ${nextOpenDayName.value ?? 'innym razem'}.`
             : `Wpadaj dziś. Strzelamy do ${closeTime.value}.`;
     }
 
@@ -208,20 +248,20 @@ const countdownText = computed(() => {
     if (status.value.state === 'open') {
         const left = `Do zamknięcia zostało ${formatDuration(status.value.minutesUntilClose)}.`;
 
-        return isClosingSoon(status.value) && nextOpenPhrase.value
-            ? `${left} Jesteśmy też ${nextOpenPhrase.value}.`
-            : left;
+        if (isClosingSoon(status.value) && nextOpenPhrase.value) {
+            return closureNote.value
+                ? `${left} ${closureNote.value} Jesteśmy ${nextOpenPhrase.value}.`
+                : `${left} Jesteśmy też ${nextOpenPhrase.value}.`;
+        }
+
+        return closureNote.value ? `${left} ${closureNote.value}` : left;
     }
 
     if (status.value.state === 'opens_later_today') {
         return `Otwieramy za ${formatDuration(status.value.minutesUntilOpen)}.`;
     }
 
-    if (status.value.today?.closure_reason) {
-        return `Dziś nieczynne: ${status.value.today.closure_reason}.`;
-    }
-
-    return null;
+    return closureNote.value;
 });
 
 const badgeClass = computed(() => {
