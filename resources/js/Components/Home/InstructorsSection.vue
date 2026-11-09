@@ -1,15 +1,16 @@
 <template>
-    <section class="border-t border-black/10 bg-stone-50 py-16">
+    <section id="instruktorzy" class="border-t border-black/10 bg-stone-50 py-16 sm:py-20">
         <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto max-w-3xl text-center">
                 <p class="text-sm font-semibold uppercase tracking-[0.3em] text-amber-700">
-                    Zespół Sagittarius
+                    Instruktorzy
                 </p>
                 <h2 class="mt-3 text-3xl font-semibold tracking-tight text-black sm:text-4xl">
-                    Poznaj naszych instruktorów
+                    Kto będzie stał obok ciebie
                 </h2>
                 <p class="mt-4 text-base leading-7 text-black/70">
-                    Doświadczeni instruktorzy dbają o bezpieczeństwo, komfort i dobrą atmosferę podczas każdej wizyty na strzelnicy.
+                    Jeśli nie masz uprawnień, strzelasz z jednym z nich. Pokaże wszystko od zera, a jak coś nie wychodzi, poprawi.
+                    Nie musisz niczego umieć przed przyjazdem.
                 </p>
             </div>
 
@@ -44,8 +45,8 @@
                             </h3>
                         </div>
 
-                        <p class="text-sm leading-6 text-black/70">
-                            {{ instructor.description || 'Instruktor z doświadczeniem praktycznym i nastawieniem na bezpieczne szkolenie.' }}
+                        <p v-if="instructor.description" class="text-sm leading-6 text-black/70">
+                            {{ instructor.description }}
                         </p>
                     </div>
                 </article>

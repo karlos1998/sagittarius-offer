@@ -126,3 +126,38 @@ export interface PanelOrder {
     completed_at?: string | null;
     created_at?: string | null;
 }
+
+export interface RangeDay {
+    date: string;
+    weekday: number;
+    is_open: boolean;
+    opens_at: string | null;
+    closes_at: string | null;
+    closure_reason: string | null;
+}
+
+export interface RangeScheduleData {
+    timezone: string;
+    generated_at: string;
+    days: RangeDay[];
+}
+
+export interface RangeLocation {
+    address: {
+        street: string;
+        postal_code: string;
+        city: string;
+    };
+    maps_url: string;
+    place_url: string;
+    permit_help_url: string;
+}
+
+export interface ShotPriceHighlight {
+    gun_type: string;
+    guns_count: number;
+    example_guns: string[];
+    shots: number;
+    standard_price_per_shot: number;
+    club_price_per_shot: number;
+}
