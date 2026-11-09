@@ -14,13 +14,19 @@
         <meta property="og:title" content="{{ config('app.name', 'KS Sagittarius') }}">
         <meta property="og:description" content="Oficjalna oferta KS Sagittarius. Wybierz broń i pakiety strzeleckie oraz złóż zamówienie online.">
         <meta property="og:url" content="{{ url()->current() }}">
-        <meta property="og:image" content="{{ url('/images/branding/kss-logo.png') }}">
+        <meta property="og:image" content="{{ url('/images/branding/og-image.jpg') }}">
 
         <meta name="twitter:card" content="summary_large_image">
         <meta name="twitter:title" content="{{ config('app.name', 'KS Sagittarius') }}">
         <meta name="twitter:description" content="Oficjalna oferta KS Sagittarius. Wybierz broń i pakiety strzeleckie oraz złóż zamówienie online.">
-        <meta name="twitter:image" content="{{ url('/images/branding/kss-logo.png') }}">
+        <meta name="twitter:image" content="{{ url('/images/branding/og-image.jpg') }}">
         <link rel="canonical" href="{{ url()->current() }}">
+
+        <link rel="icon" href="/favicon.ico" sizes="48x48">
+        <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        <link rel="manifest" href="/site.webmanifest">
+        <meta name="theme-color" content="#000000">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">

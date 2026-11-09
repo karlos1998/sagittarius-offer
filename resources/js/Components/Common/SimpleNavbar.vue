@@ -1,9 +1,14 @@
 <template>
-    <nav class="sticky top-0 z-50 h-12 border-b border-black bg-black text-white">
+    <nav class="sticky top-0 z-50 h-14 border-b border-black bg-black text-white">
         <div class="mx-auto flex h-full w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-            <Link :href="route('home')" class="flex items-center gap-2">
-                <img src="/images/branding/kss-mark.png" alt="KS Sagittarius" class="h-7 w-7 rounded-sm border border-white/40 bg-white object-contain p-0.5">
-                <span class="hidden text-xs font-semibold tracking-wide uppercase sm:inline">KS Sagittarius</span>
+            <Link :href="route('home')" class="flex shrink-0 items-center" aria-label="KS Sagittarius, strona główna">
+                <img
+                    src="/images/branding/logo-white.png"
+                    alt="Klub Strzelecki Sagittarius"
+                    width="568"
+                    height="191"
+                    class="h-7 w-auto sm:h-9"
+                >
             </Link>
 
             <div class="flex items-center gap-2 sm:gap-3 text-sm">

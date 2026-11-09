@@ -7,11 +7,13 @@ use App\Http\Resources\Storefront\GunResource;
 use App\Models\Gun;
 use App\Models\GunPackage;
 use App\Models\GunType;
+use App\Services\CartService;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class GunController extends Controller
 {
-    public function index()
+    public function index(CartService $cartService): Response
     {
         $guns = GunResource::collection(
             Gun::with(['gunType', 'caliber.ammunitions'])->get()
@@ -36,6 +38,7 @@ class GunController extends Controller
             'gunTypes' => $gunTypes,
             'gunPackages' => $gunPackages,
             'cart' => session()->get('cart', []),
+            'isClubMember' => $cartService->isClubMember(),
         ]);
     }
 }

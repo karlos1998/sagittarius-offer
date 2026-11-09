@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Support\RangeSchedule\RangeSchedule;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -19,7 +20,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(RangeSchedule::class, fn (): RangeSchedule => RangeSchedule::fromConfig());
     }
 
     /**

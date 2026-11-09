@@ -28,6 +28,11 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->brandName('KS Sagittarius')
+            ->brandLogo(asset('images/branding/logo-black.png'))
+            ->darkModeBrandLogo(asset('images/branding/logo-white.png'))
+            ->brandLogoHeight('2.5rem')
+            ->favicon(asset('favicon-32x32.png'))
             ->colors([
                 'primary' => Color::Amber,
             ])
