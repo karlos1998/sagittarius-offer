@@ -38,6 +38,8 @@ class GunPackageResource extends JsonResource
                     'ammunition' => $packageGun->ammunition ? [
                         'id' => $packageGun->ammunition->id,
                         'name' => $packageGun->ammunition->name,
+                        'standard_price' => (float) $packageGun->ammunition->standard_price,
+                        'club_price' => (float) $packageGun->ammunition->club_price,
                     ] : null,
                 ])
                 ->values()
