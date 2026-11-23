@@ -28,9 +28,27 @@
                 </p>
 
                 <p class="mt-5 max-w-xl text-lg leading-8 text-black/70">
-                    Nie musisz dzwonić ani się zapisywać. Przyjeżdżasz, dostajesz broń i słuchawki,
-                    a instruktor stoi obok i wszystko ci pokazuje. Pozwolenie nie jest potrzebne.
+                    {{ introText }}
                 </p>
+
+                <div
+                    v-if="showCallAhead"
+                    class="mt-6 flex max-w-xl flex-col gap-3 rounded-2xl border border-amber-300 bg-amber-50 p-4 sm:flex-row sm:items-center sm:justify-between"
+                >
+                    <p class="text-sm leading-6 text-amber-950">
+                        <span class="font-semibold">W święta zadzwoń przed przyjazdem.</span>
+                        Odbiera {{ location.contact.name }}.
+                    </p>
+                    <a
+                        :href="`tel:${location.contact.phone}`"
+                        class="inline-flex shrink-0 items-center justify-center gap-2 rounded border border-black bg-black px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white hover:text-black"
+                    >
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 5.5A2.5 2.5 0 0 1 5.5 3h1.6a1 1 0 0 1 .95.68l1.2 3.6a1 1 0 0 1-.5 1.2l-1.8.9a11 11 0 0 0 5.67 5.67l.9-1.8a1 1 0 0 1 1.2-.5l3.6 1.2a1 1 0 0 1 .68.95v1.6A2.5 2.5 0 0 1 18.5 21C10.5 21 3 13.5 3 5.5Z" />
+                        </svg>
+                        {{ location.contact.phone_display }}
+                    </a>
+                </div>
 
                 <div class="mt-8 flex flex-col gap-3 sm:flex-row">
                     <a
@@ -71,8 +89,10 @@
                                 ? 'border-black bg-black text-white'
                                 : day.is_open
                                     ? 'border-black/15 bg-white text-black'
-                                    : 'border-dashed border-black/20 bg-stone-50 text-black/50'"
-                            :title="day.closure_reason ?? undefined"
+                                    : day.call_ahead_reason
+                                        ? 'border-dashed border-amber-400 bg-amber-50 text-amber-950'
+                                        : 'border-dashed border-black/20 bg-stone-50 text-black/50'"
+                            :title="day.closure_reason ?? day.call_ahead_reason ?? undefined"
                         >
                             <span class="text-xs font-semibold uppercase">
                                 {{ dayLabel(day, todayDate, tomorrowDate) }}
@@ -82,15 +102,20 @@
                                 {{ formatTime(day.opens_at, schedule.timezone) }}<br>
                                 <span class="opacity-70">do {{ formatTime(day.closes_at, schedule.timezone) }}</span>
                             </span>
+                            <span v-else-if="day.call_ahead_reason" class="mt-1 text-xs font-medium leading-4">
+                                święto<br>
+                                <span class="opacity-70">zadzwoń</span>
+                            </span>
                             <span v-else class="mt-1 text-xs font-medium leading-4">nieczynne</span>
                         </li>
                     </ol>
                     <p
-                        v-if="closedWithReason.length"
+                        v-if="specialDays.length"
                         class="mt-3 text-xs text-black/50"
                     >
-                        <span v-for="(day, index) in closedWithReason" :key="day.date">
-                            {{ index ? ' · ' : '' }}{{ shortDate(day.date) }} nieczynne: {{ day.closure_reason }}
+                        <span v-for="(day, index) in specialDays" :key="day.date">
+                            {{ index ? ' · ' : '' }}{{ shortDate(day.date) }}
+                            {{ day.call_ahead_reason ? `${day.call_ahead_reason}, zadzwoń` : `nieczynne: ${day.closure_reason}` }}
                         </span>
                     </p>
                 </div>
@@ -105,7 +130,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import RangeVideo from './RangeVideo.vue';
-import type { RangeLocation, RangeScheduleData } from '@/types/storefront';
+import type { RangeDay, RangeLocation, RangeScheduleData } from '@/types/storefront';
 import {
     addDaysToDateString,
     dayLabel,
@@ -146,7 +171,8 @@ const todayDate = computed(() => localDateString(now.value, props.schedule.timez
 const tomorrowDate = computed(() => addDaysToDateString(todayDate.value, 1));
 
 const weekDays = computed(() => props.schedule.days.filter((day) => day.date >= todayDate.value).slice(0, 7));
-const closedWithReason = computed(() => weekDays.value.filter((day) => !day.is_open && day.closure_reason));
+const specialDays = computed(() => weekDays.value.filter((day) => day.closure_reason || day.call_ahead_reason));
+const showCallAhead = computed(() => weekDays.value.some((day) => day.call_ahead_reason));
 
 const nextOpenPhrase = computed(() => {
     const day = status.value.nextOpenDay;
@@ -174,6 +200,46 @@ const upcomingClosures = computed(() => {
         && (nextOpenDate === null || day.date < nextOpenDate)
         && !day.is_open
         && day.closure_reason);
+});
+
+function dayNameFor(day: RangeDay): string {
+    if (day.date === todayDate.value) {
+        return 'dziś';
+    }
+
+    return relativeDayPhrase(day, tomorrowDate.value);
+}
+
+function capitalize(text: string): string {
+    return `${text.charAt(0).toUpperCase()}${text.slice(1)}`;
+}
+
+function joinPl(parts: string[]): string {
+    return parts.length > 1 ? `${parts.slice(0, -1).join(', ')} i ${parts[parts.length - 1]}` : (parts[0] ?? '');
+}
+
+const upcomingCallAheadDays = computed(() => {
+    const nextOpenDate = status.value.nextOpenDay?.date ?? null;
+
+    return props.schedule.days.filter((day) => day.date > todayDate.value
+        && (nextOpenDate === null || day.date < nextOpenDate)
+        && day.call_ahead_reason);
+});
+
+const callAheadNote = computed(() => {
+    const days = upcomingCallAheadDays.value;
+
+    if (!days.length) {
+        return null;
+    }
+
+    if (days.length === 1) {
+        return `${capitalize(dayNameFor(days[0]))} święto: ${days[0].call_ahead_reason}. Często wtedy strzelamy, tylko w innych godzinach, więc zadzwoń.`;
+    }
+
+    const parts = days.map((day) => `${dayNameFor(day)} (${day.call_ahead_reason})`);
+
+    return `Święta: ${joinPl(parts)}. Często wtedy strzelamy, tylko w innych godzinach, więc zadzwoń.`;
 });
 
 const closureNote = computed(() => {
@@ -219,6 +285,10 @@ const badgeText = computed(() => {
         return `Dziś otwieramy o ${openTime.value}`;
     }
 
+    if (status.value.state === 'call_ahead_today') {
+        return `Dziś święto: ${status.value.today?.call_ahead_reason}`;
+    }
+
     if (nextOpenDayName.value) {
         return `Otwieramy ${nextOpenDayName.value} o ${nextOpenTime.value}`;
     }
@@ -237,6 +307,10 @@ const headline = computed(() => {
         return `Dziś strzelamy od ${openTime.value} do ${closeTime.value}. Przyjedź.`;
     }
 
+    if (status.value.state === 'call_ahead_today') {
+        return 'Dziś święto. Zadzwoń, a powiemy ci, do której strzelamy.';
+    }
+
     if (nextOpenDayName.value) {
         return `Wpadnij ${nextOpenDayName.value}. Strzelamy od ${nextOpenTime.value} do ${nextCloseTime.value}.`;
     }
@@ -248,20 +322,36 @@ const countdownText = computed(() => {
     if (status.value.state === 'open') {
         const left = `Do zamknięcia zostało ${formatDuration(status.value.minutesUntilClose)}.`;
 
+        const notes = [callAheadNote.value, closureNote.value].filter(Boolean).join(' ');
+
         if (isClosingSoon(status.value) && nextOpenPhrase.value) {
-            return closureNote.value
-                ? `${left} ${closureNote.value} Jesteśmy ${nextOpenPhrase.value}.`
+            return notes
+                ? `${left} ${notes} ${callAheadNote.value ? 'Bez dzwonienia jesteśmy' : 'Jesteśmy'} ${nextOpenPhrase.value}.`
                 : `${left} Jesteśmy też ${nextOpenPhrase.value}.`;
         }
 
-        return closureNote.value ? `${left} ${closureNote.value}` : left;
+        return notes ? `${left} ${notes}` : left;
     }
 
     if (status.value.state === 'opens_later_today') {
         return `Otwieramy za ${formatDuration(status.value.minutesUntilOpen)}.`;
     }
 
-    return closureNote.value;
+    if (status.value.state === 'call_ahead_today') {
+        const regularDay = nextOpenPhrase.value ? ` Bez dzwonienia wpadniesz ${nextOpenPhrase.value}.` : '';
+
+        return `W święta często jesteśmy otwarci, tylko w innych godzinach.${regularDay}`;
+    }
+
+    return [callAheadNote.value, closureNote.value].filter(Boolean).join(' ') || null;
+});
+
+const introText = computed(() => {
+    if (status.value.state === 'call_ahead_today') {
+        return 'Na co dzień nie trzeba dzwonić ani się zapisywać. Przyjeżdżasz, dostajesz broń i słuchawki, a instruktor stoi obok i wszystko ci pokazuje. Pozwolenie nie jest potrzebne.';
+    }
+
+    return 'Nie musisz dzwonić ani się zapisywać. Przyjeżdżasz, dostajesz broń i słuchawki, a instruktor stoi obok i wszystko ci pokazuje. Pozwolenie nie jest potrzebne.';
 });
 
 const badgeClass = computed(() => {

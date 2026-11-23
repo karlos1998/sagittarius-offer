@@ -11,7 +11,7 @@ afterEach(function () {
     CarbonImmutable::setTestNow();
 });
 
-it('shares upcoming opening days with holidays and configured closures', function () {
+it('shares upcoming opening days with call-ahead holidays and configured closures', function () {
     CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-11-09 10:00', 'Europe/Warsaw'));
     config()->set('range.closed_dates', ['2026-11-13' => 'Zawody klubowe']);
 
@@ -23,13 +23,17 @@ it('shares upcoming opening days with holidays and configured closures', functio
             ->has('schedule.days', 8)
             ->where('schedule.days.0.date', '2026-11-09')
             ->where('schedule.days.0.is_open', true)
-            ->where('schedule.days.0.opens_at', '2026-11-09T09:00:00+01:00')
+            ->where('schedule.days.0.opens_at', '2026-11-09T10:00:00+01:00')
             ->where('schedule.days.0.closes_at', '2026-11-09T18:00:00+01:00')
-            ->where('schedule.days.2.closure_reason', 'Święto Niepodległości')
+            ->where('schedule.days.2.is_open', false)
+            ->where('schedule.days.2.closure_reason', null)
+            ->where('schedule.days.2.call_ahead_reason', 'Święto Niepodległości')
             ->where('schedule.days.4.is_open', false)
             ->where('schedule.days.4.closure_reason', 'Zawody klubowe')
             ->where('location.address.street', 'Stawiskowska 57A')
             ->has('location.maps_url')
+            ->where('location.contact.name', 'Arkadiusz Lesiński')
+            ->where('location.contact.phone', '+48668221032')
         );
 });
 

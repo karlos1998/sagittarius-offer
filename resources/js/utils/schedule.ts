@@ -1,6 +1,6 @@
 import type { RangeDay } from '@/types/storefront';
 
-export type RangeState = 'open' | 'opens_later_today' | 'closed_today';
+export type RangeState = 'open' | 'opens_later_today' | 'call_ahead_today' | 'closed_today';
 
 export interface RangeStatus {
     state: RangeState;
@@ -58,6 +58,10 @@ export function describeRangeStatus(days: RangeDay[], now: number, timeZone: str
                 minutesUntilOpen: Math.ceil((opensAt - now) / 60000),
             };
         }
+    }
+
+    if (today?.call_ahead_reason) {
+        return { state: 'call_ahead_today', today, nextOpenDay, minutesUntilClose: 0, minutesUntilOpen: 0 };
     }
 
     return { state: 'closed_today', today, nextOpenDay, minutesUntilClose: 0, minutesUntilOpen: 0 };

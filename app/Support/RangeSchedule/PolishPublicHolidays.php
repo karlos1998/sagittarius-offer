@@ -4,14 +4,14 @@ namespace App\Support\RangeSchedule;
 
 use Carbon\CarbonImmutable;
 
-class PolishPublicHolidays implements ClosureProvider
+class PolishPublicHolidays implements SpecialDayProvider
 {
     /**
      * @var array<int, array<string, string>>
      */
     private array $holidaysByYear = [];
 
-    public function closureReasonFor(CarbonImmutable $date): ?string
+    public function reasonFor(CarbonImmutable $date): ?string
     {
         return $this->forYear($date->year)[$date->toDateString()] ?? null;
     }

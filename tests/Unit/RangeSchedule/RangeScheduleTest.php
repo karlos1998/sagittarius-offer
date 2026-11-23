@@ -18,7 +18,8 @@ function rangeSchedule(array $closedDates = []): RangeSchedule
             'sunday' => null,
         ],
         timezone: 'Europe/Warsaw',
-        closureProviders: [new PolishPublicHolidays, new ConfiguredClosures($closedDates)],
+        closureProviders: [new ConfiguredClosures($closedDates)],
+        callAheadProviders: [new PolishPublicHolidays],
     );
 }
 
@@ -38,11 +39,21 @@ it('keeps the range closed on weekdays without hours', function () {
         ->and($day->closureReason)->toBeNull();
 });
 
-it('closes on public holidays with the holiday name as reason', function () {
+it('asks visitors to call ahead on public holidays instead of closing', function () {
     $day = rangeSchedule()->day(CarbonImmutable::parse('2026-11-11', 'Europe/Warsaw'));
 
     expect($day->isOpen())->toBeFalse()
-        ->and($day->closureReason)->toBe('Święto Niepodległości');
+        ->and($day->requiresCallAhead())->toBeTrue()
+        ->and($day->callAheadReason)->toBe('Święto Niepodległości')
+        ->and($day->closureReason)->toBeNull();
+});
+
+it('lets a configured closure win over a holiday', function () {
+    $day = rangeSchedule(['2026-12-25' => 'Remont osi'])
+        ->day(CarbonImmutable::parse('2026-12-25', 'Europe/Warsaw'));
+
+    expect($day->closureReason)->toBe('Remont osi')
+        ->and($day->requiresCallAhead())->toBeFalse();
 });
 
 it('closes on configured one-off dates', function () {
@@ -69,7 +80,8 @@ it('lists consecutive upcoming days starting today', function () {
         ])
         ->and($days[2]->toArray())->toMatchArray([
             'is_open' => false,
-            'closure_reason' => 'Święto Niepodległości',
+            'closure_reason' => null,
+            'call_ahead_reason' => 'Święto Niepodległości',
             'weekday' => 3,
         ]);
 });

@@ -24,13 +24,13 @@ return [
     */
 
     'weekly_hours' => [
-        'monday' => ['09:00', '18:00'],
-        'tuesday' => ['09:00', '18:00'],
-        'wednesday' => ['09:00', '18:00'],
-        'thursday' => ['09:00', '18:00'],
-        'friday' => ['09:00', '18:00'],
-        'saturday' => ['09:00', '18:00'],
-        'sunday' => ['09:00', '18:00'],
+        'monday' => ['10:00', '18:00'],
+        'tuesday' => ['10:00', '18:00'],
+        'wednesday' => ['10:00', '18:00'],
+        'thursday' => ['10:00', '18:00'],
+        'friday' => ['10:00', '18:00'],
+        'saturday' => ['10:00', '18:00'],
+        'sunday' => ['10:00', '18:00'],
     ],
 
     /*
@@ -38,15 +38,29 @@ return [
     | Closure providers
     |--------------------------------------------------------------------------
     |
-    | Classes implementing ClosureProvider. Each one can close the range on a
-    | given date and give the reason shown to visitors. Add a provider here
+    | Classes implementing SpecialDayProvider. Each one can close the range on
+    | a given date and give the reason shown to visitors. Add a provider here
     | (e.g. competitions stored in the database) to close more days.
     |
     */
 
     'closure_providers' => [
-        PolishPublicHolidays::class,
         ConfiguredClosures::class,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Call-ahead providers
+    |--------------------------------------------------------------------------
+    |
+    | Classes implementing SpecialDayProvider for days with no fixed hours.
+    | The range is often open on holidays, but with different hours, so
+    | visitors are asked to phone the range contact before coming.
+    |
+    */
+
+    'call_ahead_providers' => [
+        PolishPublicHolidays::class,
     ],
 
     /*
@@ -77,6 +91,21 @@ return [
     'maps_url' => 'https://www.google.com/maps/dir/?api=1&destination=53.2025552,22.0983882&destination_place_id=ChIJjbmg2kgyHkcRFRlfZIjdDHY',
 
     'place_url' => 'https://www.google.com/maps/place/Klub+Strzelecki+SAGITTARIUS/@53.2025552,22.0983882,17z',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Range contact
+    |--------------------------------------------------------------------------
+    |
+    | Person to call on holidays and other days without fixed hours.
+    |
+    */
+
+    'contact' => [
+        'name' => 'Arkadiusz Lesiński',
+        'phone' => '+48668221032',
+        'phone_display' => '668 221 032',
+    ],
 
     'permit_help_url' => 'https://pomoc.kssagittarius.pl/komenda',
 
