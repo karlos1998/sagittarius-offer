@@ -46,6 +46,7 @@ class HomeController extends Controller
                 'maps_url' => config('range.maps_url'),
                 'place_url' => config('range.place_url'),
                 'permit_help_url' => config('range.permit_help_url'),
+                'contact' => config('range.contact'),
             ],
             'priceHighlights' => $shotPriceHighlights->perGunType(),
         ]);

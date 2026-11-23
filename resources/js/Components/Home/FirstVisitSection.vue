@@ -42,7 +42,7 @@
 const steps = [
     {
         title: 'Przyjeżdżasz, kiedy ci pasuje',
-        text: 'W godzinach otwarcia, bez rezerwacji i bez telefonu. Weź ze sobą dowód osobisty.',
+        text: 'W godzinach otwarcia, bez rezerwacji. Dzwonić trzeba tylko w święta. Weź ze sobą dowód osobisty.',
     },
     {
         title: 'Wybierasz, z czego chcesz strzelać',

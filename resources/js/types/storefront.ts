@@ -134,6 +134,7 @@ export interface RangeDay {
     opens_at: string | null;
     closes_at: string | null;
     closure_reason: string | null;
+    call_ahead_reason: string | null;
 }
 
 export interface RangeScheduleData {
@@ -151,6 +152,13 @@ export interface RangeLocation {
     maps_url: string;
     place_url: string;
     permit_help_url: string;
+    contact: RangeContact;
+}
+
+export interface RangeContact {
+    name: string;
+    phone: string;
+    phone_display: string;
 }
 
 export interface ShotPriceHighlight {

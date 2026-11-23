@@ -33,6 +33,6 @@ it('does not treat christmas eve as a holiday before 2025', function () {
 it('returns the closure reason only on holidays', function () {
     $holidays = new PolishPublicHolidays;
 
-    expect($holidays->closureReasonFor(CarbonImmutable::parse('2026-12-25')))->toBe('Boże Narodzenie')
-        ->and($holidays->closureReasonFor(CarbonImmutable::parse('2026-11-10')))->toBeNull();
+    expect($holidays->reasonFor(CarbonImmutable::parse('2026-12-25')))->toBe('Boże Narodzenie')
+        ->and($holidays->reasonFor(CarbonImmutable::parse('2026-11-10')))->toBeNull();
 });

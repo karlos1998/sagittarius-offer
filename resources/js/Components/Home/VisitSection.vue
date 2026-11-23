@@ -16,7 +16,16 @@
                     <div>
                         <dt class="text-xs font-semibold uppercase tracking-[0.2em] text-black/50">Godziny</dt>
                         <dd class="mt-1 text-lg">{{ hoursSummary }}</dd>
-                        <dd class="text-sm text-black/60">W święta nieczynne.</dd>
+                        <dd class="text-sm text-black/60">W święta często otwarte, ale w innych godzinach. Zadzwoń przed przyjazdem.</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-semibold uppercase tracking-[0.2em] text-black/50">Telefon na strzelnicę</dt>
+                        <dd class="mt-1 text-lg">
+                            <a :href="`tel:${location.contact.phone}`" class="font-semibold underline decoration-amber-400 decoration-2 underline-offset-4 hover:decoration-black">
+                                {{ location.contact.phone_display }}
+                            </a>
+                            <span class="text-black/60"> · {{ location.contact.name }}</span>
+                        </dd>
                     </div>
                     <div>
                         <dt class="text-xs font-semibold uppercase tracking-[0.2em] text-black/50">Płatność</dt>
@@ -57,7 +66,7 @@ const props = defineProps<{
 }>();
 
 const hoursSummary = computed(() => {
-    const regularDays = props.schedule.days.filter((day) => !day.closure_reason);
+    const regularDays = props.schedule.days.filter((day) => !day.closure_reason && !day.call_ahead_reason);
     const distinctHours = [...new Set(regularDays.map((day) => (day.is_open ? formatHours(day, props.schedule.timezone) : null)))];
 
     if (distinctHours.length === 1 && distinctHours[0] !== null) {

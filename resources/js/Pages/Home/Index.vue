@@ -9,7 +9,7 @@
         <GallerySection />
         <InstructorsSection :instructors="instructors" />
         <KidsSection />
-        <FaqSection :permit-help-url="location.permit_help_url" />
+        <FaqSection :permit-help-url="location.permit_help_url" :contact="location.contact" />
         <VisitSection :location="location" :schedule="schedule" />
         <Footer />
     </div>

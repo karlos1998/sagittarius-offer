@@ -39,8 +39,11 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
+import type { RangeContact } from '@/types/storefront';
+
 const props = defineProps<{
     permitHelpUrl: string;
+    contact: RangeContact;
 }>();
 
 interface FaqItem {
@@ -52,7 +55,8 @@ interface FaqItem {
 const items = computed<FaqItem[]>(() => [
     {
         question: 'Czy muszę się wcześniej zapisać albo zadzwonić?',
-        answer: 'Nie. Przyjeżdżasz w godzinach otwarcia i strzelasz. Miejsce się znajdzie.',
+        answer: `Nie. Przyjeżdżasz w godzinach otwarcia i strzelasz, miejsce się znajdzie. Wyjątek to święta: często jesteśmy wtedy otwarci, ale w innych godzinach, więc najpierw zadzwoń. Odbiera ${props.contact.name}:`,
+        link: { href: `tel:${props.contact.phone}`, label: props.contact.phone_display },
     },
     {
         question: 'Czy mogę przyjechać dzisiaj albo jutro?',

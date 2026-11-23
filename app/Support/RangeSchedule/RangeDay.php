@@ -11,6 +11,7 @@ class RangeDay
         public readonly ?CarbonImmutable $opensAt,
         public readonly ?CarbonImmutable $closesAt,
         public readonly ?string $closureReason = null,
+        public readonly ?string $callAheadReason = null,
     ) {}
 
     public function isOpen(): bool
@@ -19,7 +20,15 @@ class RangeDay
     }
 
     /**
-     * @return array{date: string, weekday: int, is_open: bool, opens_at: ?string, closes_at: ?string, closure_reason: ?string}
+     * Whether visitors should phone the range before coming (e.g. holidays with irregular hours).
+     */
+    public function requiresCallAhead(): bool
+    {
+        return $this->callAheadReason !== null;
+    }
+
+    /**
+     * @return array{date: string, weekday: int, is_open: bool, opens_at: ?string, closes_at: ?string, closure_reason: ?string, call_ahead_reason: ?string}
      */
     public function toArray(): array
     {
@@ -30,6 +39,7 @@ class RangeDay
             'opens_at' => $this->opensAt?->toIso8601String(),
             'closes_at' => $this->closesAt?->toIso8601String(),
             'closure_reason' => $this->closureReason,
+            'call_ahead_reason' => $this->callAheadReason,
         ];
     }
 }

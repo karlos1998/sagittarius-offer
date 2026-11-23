@@ -4,7 +4,7 @@ namespace App\Support\RangeSchedule;
 
 use Carbon\CarbonImmutable;
 
-class ConfiguredClosures implements ClosureProvider
+class ConfiguredClosures implements SpecialDayProvider
 {
     /**
      * @param  array<string, string>  $closedDates
@@ -16,7 +16,7 @@ class ConfiguredClosures implements ClosureProvider
         return new self((array) config('range.closed_dates', []));
     }
 
-    public function closureReasonFor(CarbonImmutable $date): ?string
+    public function reasonFor(CarbonImmutable $date): ?string
     {
         return $this->closedDates[$date->toDateString()] ?? null;
     }

@@ -19,12 +19,14 @@ class RangeSchedule
 
     /**
      * @param  array<string, array{0: string, 1: string}|null>  $weeklyHours
-     * @param  iterable<ClosureProvider>  $closureProviders
+     * @param  iterable<SpecialDayProvider>  $closureProviders
+     * @param  iterable<SpecialDayProvider>  $callAheadProviders
      */
     public function __construct(
         private readonly array $weeklyHours,
         private readonly string $timezone,
         private readonly iterable $closureProviders = [],
+        private readonly iterable $callAheadProviders = [],
     ) {}
 
     public static function fromConfig(): self
@@ -32,11 +34,8 @@ class RangeSchedule
         return new self(
             (array) config('range.weekly_hours', []),
             (string) config('range.timezone', 'Europe/Warsaw'),
-            collect((array) config('range.closure_providers', []))
-                ->map(fn (string $provider): ClosureProvider => method_exists($provider, 'fromConfig')
-                    ? $provider::fromConfig()
-                    : app($provider))
-                ->all(),
+            self::providersFromConfig('range.closure_providers'),
+            self::providersFromConfig('range.call_ahead_providers'),
         );
     }
 
@@ -49,12 +48,16 @@ class RangeSchedule
     {
         $day = CarbonImmutable::instance($date)->setTimezone($this->timezone)->startOfDay();
 
-        foreach ($this->closureProviders as $closureProvider) {
-            $reason = $closureProvider->closureReasonFor($day);
+        $closureReason = $this->firstReason($this->closureProviders, $day);
 
-            if ($reason !== null) {
-                return new RangeDay($day, null, null, $reason);
-            }
+        if ($closureReason !== null) {
+            return new RangeDay($day, null, null, closureReason: $closureReason);
+        }
+
+        $callAheadReason = $this->firstReason($this->callAheadProviders, $day);
+
+        if ($callAheadReason !== null) {
+            return new RangeDay($day, null, null, callAheadReason: $callAheadReason);
         }
 
         $hours = $this->weeklyHours[self::WEEKDAYS[$day->dayOfWeekIso]] ?? null;
@@ -80,6 +83,34 @@ class RangeSchedule
         return collect(range(0, $count - 1))
             ->map(fn (int $offset): RangeDay => $this->day($start->addDays($offset)))
             ->all();
+    }
+
+    /**
+     * @return array<int, SpecialDayProvider>
+     */
+    private static function providersFromConfig(string $key): array
+    {
+        return collect((array) config($key, []))
+            ->map(fn (string $provider): SpecialDayProvider => method_exists($provider, 'fromConfig')
+                ? $provider::fromConfig()
+                : app($provider))
+            ->all();
+    }
+
+    /**
+     * @param  iterable<SpecialDayProvider>  $providers
+     */
+    private function firstReason(iterable $providers, CarbonImmutable $day): ?string
+    {
+        foreach ($providers as $provider) {
+            $reason = $provider->reasonFor($day);
+
+            if ($reason !== null) {
+                return $reason;
+            }
+        }
+
+        return null;
     }
 
     private function atTime(CarbonImmutable $day, string $time): CarbonImmutable
